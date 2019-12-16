@@ -11,4 +11,4 @@
 - [weather](./modules/weather.lua): Weather state in mac menubar.
 - [windows](./modules/windows.lua): Hotkeys for window management.
 - [hotkey](./modules/hotkey.lua): Custom hotkey.
-- [utils](./modules/hotkey.lua): Tool function.
+- [utils](./modules/utils.lua): Tool function.
