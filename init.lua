@@ -15,7 +15,7 @@ end)
 require "modules/utils"
 require "modules/hotkey"
 require "modules/windows"
-require "modules/weather2"
+require "modules/weather"
 require "modules/blueutils"
 require "modules/application"
 require "modules/monitor"
