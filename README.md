@@ -10,3 +10,5 @@
 - [monitor](./modules/monitor.lua): Processing in various states.
 - [weather](./modules/weather.lua): Weather state in mac menubar.
 - [windows](./modules/windows.lua): Hotkeys for window management.
+- [hotkey](./modules/hotkey.lua): Custom hotkey.
+- [utils](./modules/hotkey.lua): Tool function.
