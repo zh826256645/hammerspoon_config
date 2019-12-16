@@ -71,7 +71,7 @@ function getWeather()
 
       tipStr = string.format("更新于 %s-%s %s:%s", dateTable.month, dateTable.day, dateTable.hour, dateTable.minute)
       menubar:setTooltip(tipStr)
-      titlestr = string.format("%s %s日（今天） 🌡️%s 💧%d 💨%d 🌬%s %s", getWeaEmoji(weather.info), dateTable.day, weather.temperature, weather.rain, weather.humidity, wind.power, weather.info)
+      titlestr = string.format("%s %s日（今天） 🌡️%s℃ 💧%d 💨%d 🌬%s %s", getWeaEmoji(weather.info), dateTable.day, weather.temperature, weather.rain, weather.humidity, wind.power, weather.info)
 
       firstLine = { title = titlestr }
       table.insert(menuData, firstLine)
