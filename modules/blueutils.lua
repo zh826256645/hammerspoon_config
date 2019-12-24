@@ -1,7 +1,7 @@
 -- 处理蓝牙
 
 -- 蓝牙耳机地址
-local MyBlueDeviceID = 'F8-DF-15-39-F1-E0'
+local MyBlueDeviceID = 'F8-DF-15-99-71-35'
 
 -- 连接对应地址的设备
 function connectBluetooth(DeviceID)
@@ -21,6 +21,7 @@ function bluetoothSwitch(state)
     if state == 1 then
       print("开启蓝牙")
     elseif state == 0 then
+      disconnectBluetooth(MyBlueDeviceID)
       print("关闭蓝牙")
     end
 

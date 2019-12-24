@@ -141,8 +141,8 @@ function storeCopy()
    end
 end
 
-timer = hs.timer.new(frequency, storeCopy)
-timer:start()
+historyTimer = hs.timer.new(frequency, storeCopy)
+historyTimer:start()
 
 setTitle()
 jumpcut:setMenu(populateMenu)
