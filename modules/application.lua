@@ -2,6 +2,7 @@
 
 theWeChatBundleID = "com.tencent.xinWeChat"
 theQQBundleID = "com.tencent.qq"
+theFinderID = "com.apple.finder"
 
 nowStatus = nil
 
@@ -20,3 +21,8 @@ end
 function getApplicationInfo(bundleID)
     print(hs.application.infoForBundleID(bundleID))
 end
+
+-- 绑定访达快捷键
+hs.hotkey.bind(hyperCmd, "E", function()
+    hs.application.open(theFinderID)
+  end)

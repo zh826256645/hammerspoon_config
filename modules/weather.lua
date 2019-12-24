@@ -1,6 +1,7 @@
 local cityId = '591170'
 local currentWeatherUrl = 'http://www.nmc.cn/f/rest/real/%s'
 local sevenDaysWeatherUrl = 'http://www.nmc.cn/f/rest/tempchart/%s'
+local detailsUrl = 'http://www.nmc.cn/publish/forecast/AGD/meizhou.html'
 
 local urlApi = 'https://www.tianqiapi.com/api/?version=v1&appid=42598848&appsecret=7IDFGj4z'
 
@@ -73,7 +74,7 @@ function getWeather()
       menubar:setTooltip(tipStr)
       titlestr = string.format("%s %s日（今天） 🌡️%s℃ 💧%d 💨%d 🌬%s %s", getWeaEmoji(weather.info), dateTable.day, weather.temperature, weather.rain, weather.humidity, wind.power, weather.info)
 
-      firstLine = { title = titlestr }
+      firstLine = { title = titlestr, fn = function() hs.urlevent.openURL(detailsUrl) end}
       table.insert(menuData, firstLine)
       table.insert(menuData, {title = '-'})
 
