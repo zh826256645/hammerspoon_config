@@ -33,7 +33,7 @@ function getWeaEmoji(weatherInfoCN)
       weatherInfoPY = 'shachen'
    elseif weatherInfoCN == "雾" then
       weatherInfoPY = 'wu'
-   elseif weatherInfoCN == "雨" then
+   elseif weatherInfoCN == "雨" or weatherInfoCN == "小雨" then
       weatherInfoPY = 'yu'
    elseif weatherInfoCN == "雨夹雪" then
       weatherInfoPY = 'yujiaxue'
