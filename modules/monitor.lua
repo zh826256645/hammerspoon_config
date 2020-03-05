@@ -4,12 +4,12 @@
 function closenAfter(sec, bundleID)
   local name = string.split(bundleID, '.')[3]
 
-  print(sec.." 秒后如果屏幕依然上锁或者睡眠，将关闭 "..name.." 与 蓝牙")
+  print(sec.." 秒后如果屏幕依然上锁或者睡眠，将关闭 "..name.." 与断开蓝牙耳机")
   
   hs.timer.doAfter(sec, function()
       if (nowStatus == hs.caffeinate.watcher.screensDidSleep or nowStatus == hs.caffeinate.watcher.screensDidLock) then
           closeApplication(bundleID)
-          bluetoothSwitch(0)
+          closeMyBluetooth()
       else
           print("取消关闭 "..name.." 与 蓝牙")
       end
@@ -19,7 +19,7 @@ end
 
 
 function caffeinateCallback(eventType)
-  nowStatus = eventType
+    nowStatus = eventType
 
     if (eventType == hs.caffeinate.watcher.screensDidSleep) then
       print("睡眠")
@@ -33,7 +33,7 @@ function caffeinateCallback(eventType)
     elseif (eventType == hs.caffeinate.watcher.screensDidUnlock) then
       print("解锁")
       -- blueUtils:connectBluetooth(MyBlueDeviceID) --
-      bluetoothSwitch(1)
+    --   bluetoothSwitch(1)
       getWeather()
     end
 end

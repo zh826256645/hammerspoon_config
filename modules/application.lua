@@ -3,6 +3,7 @@
 theWeChatBundleID = "com.tencent.xinWeChat"
 theQQBundleID = "com.tencent.qq"
 theFinderID = "com.apple.finder"
+theIterm2ID = "com.googlecode.iterm2"
 
 nowStatus = nil
 
@@ -26,3 +27,8 @@ end
 hs.hotkey.bind(hyperCmd, "E", function()
     hs.application.open(theFinderID)
   end)
+
+-- 绑定 Iterm2 快捷键
+hs.hotkey.bind(hyperCtrl, "T", function()
+    hs.application.open(theIterm2ID)
+    end)

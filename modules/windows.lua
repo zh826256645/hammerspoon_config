@@ -169,12 +169,14 @@ hotkey.bind(hyperShift, "3", function()
 end)
 
 -- 移动鼠标第n个屏幕
--- 快捷键为 Shift + Command + `
+-- 快捷键为 Command + `
 hs.hotkey.bind(hyperCmd, '`', function()
   local screen = hs.mouse.getCurrentScreen()
   local nextScreen = screen:next()
   local rect = nextScreen:fullFrame()
   local center = hs.geometry.rectMidPoint(rect)
-
   hs.mouse.setAbsolutePosition(center)
+
+  -- os.execute("sleep " .. 0.1)
+  -- hs.eventtap.leftClick(center)
 end)
