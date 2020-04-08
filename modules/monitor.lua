@@ -10,6 +10,7 @@ function closenAfter(sec, bundleID)
       if (nowStatus == hs.caffeinate.watcher.screensDidSleep or nowStatus == hs.caffeinate.watcher.screensDidLock) then
           closeApplication(bundleID)
           closeMyBluetooth()
+          bluetoothSwitch(0)
       else
           print("取消关闭 "..name.." 与 蓝牙")
       end

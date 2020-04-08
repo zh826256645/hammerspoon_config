@@ -30,9 +30,15 @@ function bluetoothSwitch(state)
     elseif state == 0 then
       print("关闭蓝牙")
     end
+    
+    -- 判断蓝牙状态
+    cmd = "/usr/local/bin/blueutil --power"
+    succeeded, result = hs.osascript.applescript(string.format('do shell script "%s"', cmd))
 
-    cmd = "/usr/local/bin/blueutil --power "..(state)
-    result = hs.osascript.applescript(string.format('do shell script "%s"', cmd))
+    if tonumber(result) ~= state then
+      cmdSetState = "/usr/local/bin/blueutil --power "..(state)
+      result = hs.osascript.applescript(string.format('do shell script "%s"', cmdSetState))
+    end
 end
 
 function closeMyBluetooth()

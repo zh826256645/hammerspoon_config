@@ -4,6 +4,7 @@ string.split = function(s, p)
     return rt
 end
 
+-- 将格式化时间转换为 Table
 function formatTimeToDateTable(formatTime, format)
     supportMark = {Y={name="year", num=4}, m={name="month", num=2}, d={name="day", num=2}, H={name="hour", num=2}, M={name="minute", num=2}, S={name="second", num=2}}
     dateTable = {year=0, month=0, day=0, hour=0, day=0, minute=0, second=0}
@@ -20,4 +21,37 @@ function formatTimeToDateTable(formatTime, format)
         end
     end
     return dateTable
+end
+
+
+-- 打印 table
+function printTable(table, level)
+	key = ""
+	local func = function(table, level)end
+	func = function(table, level)
+		level = level or 1
+		local indent = ""
+		for i = 1, level do
+			indent = indent.."  "
+		end
+ 
+		if key ~= "" then
+			print(indent..key.." ".."=".." ".."{")
+		else
+			print(indent .. "{")
+		end
+ 
+		key = ""
+		for k,v in pairs(table) do
+			if type(v) == "table" then
+				key = k
+				func(v, level + 1)
+			else
+				local content = string.format("%s%s = %s", indent .. "  ",tostring(k), tostring(v))
+				print(content)  
+			end
+		end
+		print(indent .. "}")
+	end
+	func(table, level)
 end
