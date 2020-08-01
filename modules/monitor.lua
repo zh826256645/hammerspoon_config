@@ -7,7 +7,7 @@ function closenAfter(sec, bundleID)
     print(sec.." 秒后如果屏幕依然上锁或者睡眠，将关闭 "..name.." 与断开蓝牙耳机")
   
     hs.timer.doAfter(sec, function()
-        if (nowStatus == hs.caffeinate.watcher.screensDidSleep or nowStatus == hs.caffeinate.watcher.screensDidLock) then
+        if (nowStatus ~= hs.caffeinate.watcher.screensDidUnlock) then
             closeApplication(bundleID)
             closeMyBluetooth()
             bluetoothSwitch(0)
