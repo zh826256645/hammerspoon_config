@@ -4,7 +4,7 @@
 function closenAfter(sec, bundleID)
     local name = string.split(bundleID, '.')[3]
 
-    print(sec.." 秒后如果屏幕依然上锁或者睡眠，将关闭 "..name.." 与断开蓝牙耳机")
+    print(sec.." 秒后如果屏幕依然未解锁，将关闭 "..name.." 与断开蓝牙耳机")
   
     hs.timer.doAfter(sec, function()
         if (nowStatus ~= hs.caffeinate.watcher.screensDidUnlock) then
