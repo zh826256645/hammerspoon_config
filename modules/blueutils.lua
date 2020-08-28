@@ -3,6 +3,7 @@
 -- 蓝牙耳机地址
 local MyJblBlueDeviceID = 'F8-DF-15-99-71-35'
 local MySonyBlueDeviceID = '38-18-4C-95-C9-2E'
+local MyKeychronT2DeviceID = 'DC-2C-26-E7-5A-7D'
 
 -- 连接对应地址的设备
 function connectBluetooth(DeviceID)
@@ -30,7 +31,7 @@ function bluetoothSwitch(state)
     elseif state == 0 then
       print("关闭蓝牙")
     end
-    
+
     -- 判断蓝牙状态
     cmd = "/usr/local/bin/blueutil --power"
     succeeded, result = hs.osascript.applescript(string.format('do shell script "%s"', cmd))
@@ -52,6 +53,12 @@ function closeMyBluetooth()
   if sonyState == 1 then
     disconnectBluetooth(MySonyBlueDeviceID)
     print("断开 Sony 蓝牙耳机")
+  end
+
+  keychronT2State = isConnectedBluetooth(MyKeychronT2DeviceID)
+  if keychronT2State == 1 then
+    disconnectBluetooth(MyKeychronT2DeviceID)
+    print("断开 Keychron T2 蓝牙键盘")
   end
 end
 
