@@ -9,6 +9,9 @@
 - 关闭应用程序
 - 绑定 Finder 快捷键到 ⌘ + e
 - 绑定 Iterm2 快捷键到 ⌃ + ⌥ + t
+- 绑定体验版 QQ 快捷键到 ⌃ + ⌘ + z
+- 绑定 Chrome 快捷键到 ⌃ + ⌘ + g
+- 绑定 VS Code 快捷键到 ⌃ + ⌘ + v
 
 [blueutils](./modules/blueutils.lua): controlling bluetooth device.
 
