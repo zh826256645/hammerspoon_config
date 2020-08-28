@@ -1,12 +1,13 @@
 -- 处理应用
 
-theWeChatBundleID = "com.tencent.xinWeChat"
-theQQBundleID = "com.tencent.qq"
-theFinderID = "com.apple.finder"
-theIterm2ID = "com.googlecode.iterm2"
-theQQID = 'com.tencent.mqq'
-theChromeID = "com.google.Chrome"
-theVSCodeID = "com.microsoft.VSCode"
+TheWeChatBundleID = "com.tencent.xinWeChat"
+TheQQBundleID = "com.tencent.qq"
+TheFinderID = "com.apple.finder"
+TheIterm2ID = "com.googlecode.iterm2"
+TheQQID = 'com.tencent.mqq'
+TheChromeID = "com.google.Chrome"
+TheVSCodeID = "com.microsoft.VSCode"
+TheLaunchpadID = "com.apple.launchpad.launcher"
 
 nowStatus = nil
 
@@ -28,25 +29,30 @@ end
 
 -- 绑定访达快捷键
 hs.hotkey.bind(hyperCmd, "E", function()
-    hs.application.open(theFinderID)
+    hs.application.open(TheFinderID)
 end)
 
 -- 绑定 Iterm2 快捷键
 hs.hotkey.bind(hyperCtrl, "T", function()
-    hs.application.open(theIterm2ID)
+    hs.application.open(TheIterm2ID)
 end)
 
 -- 绑定体验版 QQ 快捷键
 hs.hotkey.bind(hyperCtrlCmd, "Z", function()
-    hs.application.open(theQQID)
+    hs.application.open(TheQQID)
 end)
 
 -- 绑定 Chrome 快捷键
 hs.hotkey.bind(hyperCtrlCmd, "G", function ()
-    hs.application.open(theChromeID)
+    hs.application.open(TheChromeID)
 end)
 
 -- 绑定 VS Code 快捷键
 hs.hotkey.bind(hyperCtrlCmd, "V", function ()
-    hs.application.open(theVSCodeID)
+    hs.application.open(TheVSCodeID)
+end)
+
+-- 绑定 launchpad 快捷键
+hs.hotkey.bind(hyperCtrlCmd, "L", function ()
+    hs.application.open(TheLaunchpadID)
 end)
