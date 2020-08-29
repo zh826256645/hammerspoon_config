@@ -27,7 +27,7 @@ function windowHelps()
     table.insert(menuData, { title="程序快捷键", menu=subProgramMenuData})
     table.insert(subProgramMenuData, { title="iTerm              ⌃⌥T"})
     table.insert(subProgramMenuData, { title="Finder              ⌘E"})
-    
+
 end
 
 function updateHelpMenu()

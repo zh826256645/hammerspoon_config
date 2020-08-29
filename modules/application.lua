@@ -13,7 +13,7 @@ nowStatus = nil
 
 function closeApplication(bundleID)
     local application = hs.application.applicationsForBundleID(bundleID)
-    local application = application[1]
+    application = application[1]
 
     if application ~= nil and application:isRunning() then
         local name = string.split(bundleID, '.')[3]

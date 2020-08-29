@@ -5,7 +5,7 @@ function closenAfter(sec, bundleID)
     local name = string.split(bundleID, '.')[3]
 
     print(sec.." 秒后如果屏幕依然未解锁，将关闭 "..name.." 与断开蓝牙耳机")
-  
+
     hs.timer.doAfter(sec, function()
         if (nowStatus ~= hs.caffeinate.watcher.screensDidUnlock) then
             closeApplication(bundleID)
@@ -24,7 +24,7 @@ function caffeinateCallback(eventType)
 
     if (eventType == hs.caffeinate.watcher.screensDidSleep) then
         print("睡眠")
-        closenAfter(15, theWeChatBundleID)
+        closenAfter(15, TheWeChatBundleID)
     elseif (eventType == hs.caffeinate.watcher.screensDidWake) then
         print("唤醒")
     elseif (eventType == hs.caffeinate.watcher.screensDidLock) then

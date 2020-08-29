@@ -16,7 +16,7 @@ function formatTimeToDateTable(formatTime, format)
             dateTable[mark['name']] = string.sub(formatTime, index, index + mark['num'] - 1)
             format = string.sub(format, index+2)
             formatTime = string.sub(formatTime, index+mark['num'])
-        else 
+        else
             break
         end
     end
@@ -34,13 +34,13 @@ function printTable(table, level)
 		for i = 1, level do
 			indent = indent.."  "
 		end
- 
+
 		if key ~= "" then
 			print(indent..key.." ".."=".." ".."{")
 		else
 			print(indent .. "{")
 		end
- 
+
 		key = ""
 		for k,v in pairs(table) do
 			if type(v) == "table" then
@@ -48,7 +48,7 @@ function printTable(table, level)
 				func(v, level + 1)
 			else
 				local content = string.format("%s%s = %s", indent .. "  ",tostring(k), tostring(v))
-				print(content)  
+				print(content)
 			end
 		end
 		print(indent .. "}")

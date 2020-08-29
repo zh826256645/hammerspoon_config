@@ -3,8 +3,8 @@ local homeUid = "F48B18E2-97D1-4ABB-9488-640135C2EF17"
 local defaultUid = "A647F211-7CB7-4EE6-B13F-8DE36A8135AF"
 
 function currentScselectUid()
-    cmd = "scselect current set"
-    succeeded, result = hs.osascript.applescript(string.format('do shell script "%s"', cmd))
+    local cmd = "scselect current set"
+    local succeeded, result = hs.osascript.applescript(string.format('do shell script "%s"', cmd))
     if (succeeded == true) then
         result = result:gsub("^Defined sets include: %(%* == current set%)\r", "")
         result = result:gsub("/r/n", "")
@@ -20,10 +20,10 @@ function currentScselectUid()
 end
 
 function ssidChangedCallback() -- 回调
-    ssid = hs.wifi.currentNetwork() -- 获取当前 WiFi ssid
+    local ssid = hs.wifi.currentNetwork() -- 获取当前 WiFi ssid
     if (ssid ~= nil) then
-        currentUid = currentScselectUid()
-        uid = nil
+        local currentUid = currentScselectUid()
+        local uid = nil
         if (ssid == "DaSheng_5G") then
             if (currentUid ~= companyUid) then
                 uid = companyUid
@@ -38,7 +38,7 @@ function ssidChangedCallback() -- 回调
             uid = defaultUid
             hs.notify.new({title="位置", informativeText="位置切换到自动"}):send()
         end
-        
+
         if (uid ~= nil) then
             os.execute("scselect " ..uid .." > /dev/null") -- 切换网络位置
         end
