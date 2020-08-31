@@ -37,10 +37,10 @@ hs.hotkey.bind(hyperCtrl, "T", function()
     hs.application.open(TheIterm2ID)
 end)
 
--- 绑定体验版 QQ 快捷键
-hs.hotkey.bind(hyperCtrlCmd, "Z", function()
-    hs.application.open(TheQQID)
-end)
+-- -- 绑定体验版 QQ 快捷键
+-- hs.hotkey.bind(hyperCtrlCmd, "Z", function()
+--     hs.application.open(TheQQID)
+-- end)
 
 -- 绑定 Chrome 快捷键
 hs.hotkey.bind(hyperCtrlCmd, "G", function ()
