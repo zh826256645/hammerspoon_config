@@ -16,8 +16,8 @@
 [blueutils](./modules/blueutils.lua): controlling bluetooth device.
 
 - 链接/关闭蓝牙
-- 屏幕关闭后断开蓝牙连接
-- 使用时需要修改为自己的设备 ID
+- 屏幕休眠后断开蓝牙连接以及微信
+- 屏幕唤醒后打开蓝牙
 
 [helps](./modules/helps.lua): Tips in mac menubar.
 
