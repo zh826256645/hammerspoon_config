@@ -27,7 +27,8 @@ function windowHelps()
     table.insert(menuData, { title="程序快捷键", menu=subProgramMenuData})
     table.insert(subProgramMenuData, { title="iTerm              ⌃⌥T"})
     table.insert(subProgramMenuData, { title="Finder              ⌘E"})
-
+    table.insert(subProgramMenuData, { title="Chrome          ⌃⌘G"})
+    table.insert(subProgramMenuData, { title="VSCode          ⌃⌘V"})
 end
 
 function updateHelpMenu()
