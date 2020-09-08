@@ -29,6 +29,7 @@ function windowHelps()
     table.insert(subProgramMenuData, { title="Finder              ⌘E"})
     table.insert(subProgramMenuData, { title="Chrome          ⌃⌘G"})
     table.insert(subProgramMenuData, { title="VSCode          ⌃⌘V"})
+    table.insert(subProgramMenuData, { title="Launchpad     ⌃⌘V"})
 end
 
 function updateHelpMenu()

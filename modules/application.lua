@@ -52,7 +52,7 @@ hs.hotkey.bind(hyperCtrlCmd, "V", function ()
     hs.application.open(TheVSCodeID)
 end)
 
--- 绑定 launchpad 快捷键
+-- 绑定 Launchpad 快捷键
 hs.hotkey.bind(hyperCtrlCmd, "L", function ()
     hs.application.open(TheLaunchpadID)
 end)
