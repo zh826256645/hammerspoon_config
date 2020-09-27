@@ -99,12 +99,14 @@ end)
 
 -- move active window to previous monitor
 hotkey.bind(hyperShift, "Left", function()
-    window.focusedWindow():moveOneScreenWest()
+    -- window.focusedWindow():moveOneScreenWest()
+    window.focusedWindow():moveToScreen(window.focusedWindow():screen():next())
 end)
 
 -- move active window to next monitor
 hotkey.bind(hyperShift, "Right", function()
-    window.focusedWindow():moveOneScreenEast()
+    -- window.focusedWindow():moveOneScreenEast()
+    window.focusedWindow():moveToScreen(window.focusedWindow():screen():next())
 end)
 
 -- move cursor to previous monitor

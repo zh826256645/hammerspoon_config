@@ -43,7 +43,7 @@ function caffeinateCallback(eventType)
         closenAfter(15)
     elseif (eventType == hs.caffeinate.watcher.screensDidWake) then
         print("唤醒")
-        OpenAfter(10)
+        OpenAfter(5)
     elseif (eventType == hs.caffeinate.watcher.screensDidLock) then
         print("锁屏")
         -- blueUtils:disconnectBluetooth(MyBlueDeviceID) --
