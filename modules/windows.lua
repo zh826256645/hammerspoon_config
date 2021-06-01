@@ -172,12 +172,12 @@ end)
 
 -- 移动鼠标第n个屏幕
 -- 快捷键为 Command + `
-hs.hotkey.bind(hyperCmd, '`', function()
-    local currentScreen = hs.mouse.getCurrentScreen()
+hotkey.bind(hyperCmd, '`', function()
+    local currentScreen = mouse.getCurrentScreen()
     local nextScreen = currentScreen:next()
     local rect = nextScreen:fullFrame()
-    local center = hs.geometry.rectMidPoint(rect)
-    hs.mouse.setAbsolutePosition(center)
+    local center = geometry.rectMidPoint(rect)
+    mouse.setAbsolutePosition(center)
 
     -- os.execute("sleep " .. 0.1)
     -- hs.eventtap.leftClick(center)

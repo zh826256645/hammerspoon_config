@@ -29,7 +29,10 @@ function windowHelps()
     table.insert(subProgramMenuData, { title="Finder              ⌘E"})
     table.insert(subProgramMenuData, { title="Chrome          ⌃⌘G"})
     table.insert(subProgramMenuData, { title="VSCode          ⌃⌘V"})
-    table.insert(subProgramMenuData, { title="Launchpad     ⌃⌘V"})
+    table.insert(subProgramMenuData, { title="Launchpad     ⌃⌘L"})
+    table.insert(subProgramMenuData, { title="Notion            ⌃⌘N"})
+    table.insert(subProgramMenuData, { title="Reeder           ⌃⌘R"})
+    table.insert(subProgramMenuData, { title="Netease         ⌃⌘W"})
 end
 
 function updateHelpMenu()

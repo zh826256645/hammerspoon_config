@@ -24,7 +24,7 @@ function ssidChangedCallback() -- 回调
     if (ssid ~= nil) then
         local currentUid = currentScselectUid()
         local uid = nil
-        if (ssid == "DaSheng_5G") then
+        if (ssid == "TelkingNet2_5G") then
             if (currentUid ~= companyUid) then
                 uid = companyUid
                 hs.notify.new({title="位置", informativeText="位置切换到公司"}):send()

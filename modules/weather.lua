@@ -90,9 +90,7 @@ function getWeather()
             if k == 1 then
                 local subMenu = {}
                 for _k, _v in pairs(v.hours) do
-                    local _day = _v.day
-                    _day = string.split(_day, "日")[2]
-                    local _titlestr = string.format("%s时 %s %s", _day, _v.tem, _v.wea)
+                    local _titlestr = string.format("%s %s %s", _v.hours, _v.tem, _v.wea)
                     local _item = { title = _titlestr }
                     table.insert(subMenu, _item)
                 end

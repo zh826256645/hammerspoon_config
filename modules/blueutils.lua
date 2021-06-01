@@ -28,6 +28,7 @@ function bluetoothSwitch(state)
     -- state: 0(off), 1(on)
     if state == 1 then
         print("开启蓝牙")
+		hs.notify.new({title="蓝牙", informativeText="开启蓝牙"}):send()
     elseif state == 0 then
         print("关闭蓝牙")
     end

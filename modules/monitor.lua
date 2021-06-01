@@ -53,6 +53,7 @@ function caffeinateCallback(eventType)
         -- blueUtils:connectBluetooth(MyBlueDeviceID) --
         -- bluetoothSwitch(1)
         getWeather()
+        openApplication(TheScrollReverserID)
     end
 end
 
