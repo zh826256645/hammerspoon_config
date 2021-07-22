@@ -55,3 +55,8 @@ function printTable(table, level)
 	end
 	func(table, level)
 end
+
+
+string.strip = function(input)
+    return (string.gsub(input, "^%s*(.-)%s*$", "%1"))
+end
