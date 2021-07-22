@@ -7,7 +7,7 @@ end
 -- 将格式化时间转换为 Table
 function formatTimeToDateTable(formatTime, format)
     supportMark = {Y={name="year", num=4}, m={name="month", num=2}, d={name="day", num=2}, H={name="hour", num=2}, M={name="minute", num=2}, S={name="second", num=2}}
-    dateTable = {year=0, month=0, day=0, hour=0, day=0, minute=0, second=0}
+    dateTable = {year=0, month=0, day=0, hour=0, minute=0, second=0}
     while(true)
     do
         index = string.find(format, "%%")
@@ -57,6 +57,7 @@ function printTable(table, level)
 end
 
 
+-- 去除字符串两个的空格
 string.strip = function(input)
     return (string.gsub(input, "^%s*(.-)%s*$", "%1"))
 end

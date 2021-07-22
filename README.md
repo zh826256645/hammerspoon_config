@@ -37,6 +37,8 @@
 
 [hotkey](./modules/hotkey.lua): Custom hotkey.
 
+[pasteboard](./modules/pasteboard.lua): Removes Spaces at the beginning and end of clipboard characters.
+
 [utils](./modules/utils.lua): Tool function.
 
 ## Use
