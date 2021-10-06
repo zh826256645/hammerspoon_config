@@ -2,7 +2,7 @@ local companyUid = "154631B1-2A0A-4785-8EE3-EAF8D5445C68"
 local homeUid = "F48B18E2-97D1-4ABB-9488-640135C2EF17"
 local defaultUid = "A647F211-7CB7-4EE6-B13F-8DE36A8135AF"
 
-function currentScselectUid()
+local function currentScselectUid()
     local cmd = "scselect current set"
     local succeeded, result = hs.osascript.applescript(string.format('do shell script "%s"', cmd))
     if (succeeded == true) then
@@ -19,7 +19,7 @@ function currentScselectUid()
     end
 end
 
-function ssidChangedCallback() -- 回调
+local function ssidChangedCallback() -- 回调
     local ssid = hs.wifi.currentNetwork() -- 获取当前 WiFi ssid
     if (ssid ~= nil) then
         local currentUid = currentScselectUid()
@@ -45,5 +45,8 @@ function ssidChangedCallback() -- 回调
     end
 end
 
-wifiWatcher = hs.wifi.watcher.new(ssidChangedCallback)
-wifiWatcher:start() -- 开始监控
+-- 注册 Wi-Fi 监控
+function RegisterWifiWatcher()
+    local wifiWatcher = hs.wifi.watcher.new(ssidChangedCallback)
+    return wifiWatcher
+end

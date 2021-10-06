@@ -6,25 +6,26 @@ local MySonyBlueDeviceID = '38-18-4C-95-C9-2E'
 local MyKeychronT2DeviceID = 'DC-2C-26-E7-5A-7D'
 
 -- 连接对应地址的设备
-function connectBluetooth(DeviceID)
-    local cmd = "/usr/local/bin/blueutil --connect "..(DeviceID)
-    hs.osascript.applescript(string.format('do shell script "%s"', cmd))
-end
+-- local function connectBluetooth(DeviceID)
+--     local cmd = "/usr/local/bin/blueutil --connect "..(DeviceID)
+--     hs.osascript.applescript(string.format('do shell script "%s"', cmd))
+-- end
 
 -- 断开对应地址的设备
-function disconnectBluetooth(DeviceID)
+local function disconnectBluetooth(DeviceID)
     local cmd = "/usr/local/bin/blueutil --disconnect "..(DeviceID)
     hs.osascript.applescript(string.format('do shell script "%s"', cmd))
 end
 
-function isConnectedBluetooth(DeviceID)
+-- 判断设备是否连接
+local function isConnectedBluetooth(DeviceID)
     local cmd = "/usr/local/bin/blueutil --is-connected "..(DeviceID)
-    local succeeded, result = hs.osascript.applescript(string.format('do shell script "%s"', cmd))
+    local _, result = hs.osascript.applescript(string.format('do shell script "%s"', cmd))
     return tonumber(result)
 end
 
 -- 开关蓝牙
-function bluetoothSwitch(state)
+function BluetoothSwitch(state)
     -- state: 0(off), 1(on)
     if state == 1 then
         print("开启蓝牙")
@@ -43,7 +44,8 @@ function bluetoothSwitch(state)
     end
 end
 
-function closeMyBluetooth()
+--关闭我的设置
+function CloseMyBluetooth()
     local jblState = isConnectedBluetooth(MyJblBlueDeviceID)
     if jblState == 1 then
         disconnectBluetooth(MyJblBlueDeviceID)
@@ -63,12 +65,13 @@ function closeMyBluetooth()
     end
 end
 
-function bluetoothSwitchAfter(sec, state)
+-- 在多少秒后关闭蓝牙，如果屏幕依然熄灭
+function BluetoothSwitchAfter(sec, state)
     print(sec.." 秒后如果屏幕依然上锁或者睡眠，将切换蓝牙")
 
     hs.timer.doAfter(sec, function()
         if (nowStatus == hs.caffeinate.watcher.screensDidSleep or nowStatus == hs.caffeinate.watcher.screensDidLock) then
-            bluetoothSwitch(state)
+            BluetoothSwitch(state)
         else
             print("取消切换蓝牙")
         end

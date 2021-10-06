@@ -1,13 +1,10 @@
+-- 天气组件
 local cityId = '591170'
 local currentWeatherUrl = 'http://www.nmc.cn/f/rest/real/%s'
-local sevenDaysWeatherUrl = 'http://www.nmc.cn/f/rest/tempchart/%s'
+-- local sevenDaysWeatherUrl = 'http://www.nmc.cn/f/rest/tempchart/%s'
 local detailsUrl = 'http://www.nmc.cn/publish/forecast/AGD/meizhou.html'
 
 local urlApi = 'https://www.tianqiapi.com/api/?version=v1&appid=42598848&appsecret=7IDFGj4z'
-
-
-local menubar = hs.menubar.new()
-local menuData = {}
 
 local weaEmoji = {
     lei = '⚡️',
@@ -23,7 +20,7 @@ local weaEmoji = {
     default = '⌛'
 }
 
-function getWeaEmoji(weatherInfoCN)
+local function getWeaEmoji(weatherInfoCN)
     local weatherInfoPY = "default"
     if weatherInfoCN == "雷" then
         weatherInfoPY = 'lei'
@@ -47,11 +44,7 @@ function getWeaEmoji(weatherInfoCN)
     return weaEmoji[weatherInfoPY]
 end
 
-function updateMenubar()
-    menubar:setMenu(menuData)
-end
-
-function getWeather()
+function GetWeather(menubar, menuData)
     print("更新天气")
 
     hs.http.doAsyncRequest(string.format(currentWeatherUrl, cityId), "GET", nil, nil, function(code, body, htable)
@@ -74,7 +67,12 @@ function getWeather()
         menubar:setTooltip(tipStr)
         local titlestr = string.format("%s %s日（今天） 🌡️%s℃ 💧%s 💨%s 🌬%s %s", getWeaEmoji(weather.info), dateTable.day, weather.temperature, weather.rain, weather.humidity, wind.power, weather.info)
 
-        local firstLine = { title = titlestr, fn = function() hs.urlevent.openURL(detailsUrl) end}
+        local firstLine = {
+            title = titlestr,
+            fn = function()
+                hs.urlevent.openURL(detailsUrl)
+            end
+        }
         table.insert(menuData, firstLine)
         table.insert(menuData, {title = '-'})
 
@@ -101,13 +99,19 @@ function getWeather()
                 table.insert(menuData, item)
             end
         end
-    updateMenubar()
+        menubar:setMenu(menuData)
     end)
 end
 
-menubar:setTitle('⌛')
-menubar:setTooltip("Weather Info")
-getWeather()
--- hs.timer.doEvery(1800, getWeather)
-weatherTimer = hs.timer.new(600, getWeather)
-weatherTimer:start()
+function RegisterWeatherComponent()
+    local menubar = hs.menubar.new()
+    local menuData = {}
+
+    menubar:setTitle('⌛')
+    menubar:setTooltip("Weather Info")
+
+    GetWeather()
+
+    local weatherTimer = hs.timer.new(600, GetWeather)
+    return weatherTimer
+end

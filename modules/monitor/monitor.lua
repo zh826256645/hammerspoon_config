@@ -1,7 +1,7 @@
 -- 监控设备状态
 
 -- 多少秒后关闭程序
-function closenAfter(sec)
+local function closeAfter(sec)
     -- 关闭微信
     local name = string.split(TheWeChatBundleID, '.')[3]
 
@@ -9,9 +9,9 @@ function closenAfter(sec)
 
     hs.timer.doAfter(sec, function()
         if (nowStatus ~= hs.caffeinate.watcher.screensDidUnlock) then
-            closeApplication(TheWeChatBundleID)
-            closeMyBluetooth()
-            bluetoothSwitch(0)
+            CloseApplication(TheWeChatBundleID)
+            CloseMyBluetooth()
+            BluetoothSwitch(0)
         else
             print("取消关闭 "..name.." 与 蓝牙")
         end
@@ -19,14 +19,13 @@ function closenAfter(sec)
     )
 end
 
-
 -- 多少秒后开启程序
-function OpenAfter(sec)
+local function openAfter(sec)
     print(sec.." 秒后如果屏幕未休眠，将打开蓝牙")
 
     hs.timer.doAfter(sec, function()
         if (nowStatus ~= hs.caffeinate.watcher.screensDidSleep) then
-            bluetoothSwitch(1)
+            BluetoothSwitch(1)
         else
             print("取消打开蓝牙")
         end
@@ -34,16 +33,16 @@ function OpenAfter(sec)
     )
 end
 
-
-function caffeinateCallback(eventType)
+-- 根据系统状态进行不同的处理
+local function caffeinateCallback(eventType)
     nowStatus = eventType
 
     if (eventType == hs.caffeinate.watcher.screensDidSleep) then
         print("睡眠")
-        closenAfter(15)
+        closeAfter(15)
     elseif (eventType == hs.caffeinate.watcher.screensDidWake) then
         print("唤醒")
-        OpenAfter(5)
+        openAfter(5)
     elseif (eventType == hs.caffeinate.watcher.screensDidLock) then
         print("锁屏")
         -- blueUtils:disconnectBluetooth(MyBlueDeviceID) --
@@ -52,10 +51,13 @@ function caffeinateCallback(eventType)
         print("解锁")
         -- blueUtils:connectBluetooth(MyBlueDeviceID) --
         -- bluetoothSwitch(1)
-        getWeather()
-        openApplication(TheScrollReverserID)
+        GetWeather()
+        OpenApplication(TheScrollReverserID)
     end
 end
 
-caffeinateWatcher = hs.caffeinate.watcher.new(caffeinateCallback)
-caffeinateWatcher:start()
+-- 注册监控
+function RegisterMonitor()
+    local monitor = hs.caffeinate.watcher.new(caffeinateCallback)
+    return monitor
+end
