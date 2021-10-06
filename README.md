@@ -4,42 +4,56 @@
 
 ## Modules
 
-[application](./modules/application.lua): controlling application program.
-
+[application](./modules/application/application.lua): 控制应用程序
 - 关闭应用程序
 - 绑定 Finder 快捷键到 ⌘ + e
 - 绑定 Iterm2 快捷键到 ⌃ + ⌥ + t
-- 绑定体验版 QQ 快捷键到 ⌃ + ⌘ + z
+- 绑定 QQ 快捷键到 ⌃ + ⌘ + z
 - 绑定 Chrome 快捷键到 ⌃ + ⌘ + g
 - 绑定 VS Code 快捷键到 ⌃ + ⌘ + v
+- 绑定 Notion 快捷键到 ⌃ + ⌘ + n
+- 绑定 Netease 快捷键到 ⌃ + ⌘ + w
+- 绑定 Reeder 快捷键到 ⌃ + ⌘ + r
 
-[blueutils](./modules/blueutils.lua): controlling bluetooth device.
-
+[blueutils](./modules/bluetooth/blueutils.lua): 控制蓝牙
 - 链接/关闭蓝牙
 - 屏幕休眠后断开蓝牙连接以及微信
 - 屏幕唤醒后打开蓝牙
 
-[helps](./modules/helps.lua): Tips in mac menubar.
+[helps](./modules/help/helps.lua): 帮助菜单
 
-[history](./modules/history.lua): Clipboard history.
+[history](./modules/pasteboard/history.lua): 粘贴板历史记录
 
-[monitor](./modules/monitor.lua): Processing in various states.
+[pasteboard](./modules/pasteboard/pasteboard.lua): 粘贴板数据处理
+- 去除复制的字符串左右两边的空格
 
+[monitor](./modules/monitor/monitor.lua): 监控系统的状态，在不同的状态下进行不同的处理
 - 屏幕关闭后，关闭微信应用
 - 屏幕关闭后，断开蓝牙设置连接
+- 解锁后打开微信
 
-[weather](./modules/weather.lua): Weather state in mac menubar.
-
+[weather](./modules/weather/weather.lua): 天气组件
 - 使用了 [中国气象台](http://www.nmc.cn) 和 [天气 API](https://www.tianqiapi.com) 的接口获取天气
 - 使用时，需要手动修改 CityID 和链接中的城市拼音
 
-[windows](./modules/windows.lua): Hotkeys for window management.
+[windows](./modules/windows/windows.lua): 绑定窗口控制的快捷键
+- 左吸附 ^ + ⌥ + ⌘ + ←
+- 右吸附 ^ + ⌥ + ⌘ + →
+- 上吸附 ^ + ⌥ + ⌘ + ↑
+- 下吸附 ^ + ⌥ + ⌘ + ↓
+- 左上角吸附 ^ + ⌥ + ⇧ + ←
+- 右下角吸附 ^ + ⌥ + ⇧ + →
+- 右上角吸附 ^ + ⌥ + ⇧ + ↑
+- 左下角吸附 ^ + ⌥ + ⇧ + ↓
+- 到上个屏幕 ⌥ + ⇧ + ←
+- 到下个屏幕 ⌥ + ⇧ + →
+- 最大化 ^ + ⌥ + ⌘ + M
+- 全屏幕 ^ + ⌥ + ⌘ + F
+- 屏幕居中 ^ + ⌥ + ⌘ + C
 
-[hotkey](./modules/hotkey.lua): Custom hotkey.
+[hotkey](./modules/shortcuts/hotkey.lua): 定义快捷键
 
-[pasteboard](./modules/pasteboard.lua): Removes Spaces at the beginning and end of clipboard characters.
-
-[utils](./modules/utils.lua): Tool function.
+[utils](./modules/utils.lua): 工具函数
 
 ## Use
 
