@@ -43,4 +43,4 @@ WifiWatcher = RegisterWifiWatcher()
 WifiWatcher:start()
 
 -- 注册帮助面板
-HelpMenubar = RegisterHelpMenu()
+RegisterHelpMenu()

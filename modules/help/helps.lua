@@ -39,15 +39,15 @@ end
 
 -- 注册帮助界面
 function RegisterHelpMenu()
-    local helpMenubar = hs.menubar.new()
+    HelpMenubar = hs.menubar.new()
     local menuData = {}
 
-    helpMenubar:setTooltip("helps")
-    helpMenubar:setTitle("🔖")
+    HelpMenubar:setTooltip("helps")
+    HelpMenubar:setTitle("🔖")
 
     windowHelps(menuData)
 
-    updateHelpMenu(helpMenubar, menuData)
+    updateHelpMenu(HelpMenubar, menuData)
 
-    return helpMenubar
+    return HelpMenubar
 end

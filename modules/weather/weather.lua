@@ -107,13 +107,13 @@ end
 
 -- 注册天气组件
 function RegisterWeatherComponent()
-    local menubar = hs.menubar.new()
+    WeatherMenubar = hs.menubar.new()
     local menuData = {}
 
-    menubar:setTitle('⌛')
-    menubar:setTooltip("Weather Info")
+    WeatherMenubar:setTitle('⌛')
+    WeatherMenubar:setTooltip("Weather Info")
 
-    GetWeather(menubar, menuData)
+    GetWeather(WeatherMenubar, menuData)
 
     local weatherTimer = hs.timer.new(600, GetWeather)
     return weatherTimer
