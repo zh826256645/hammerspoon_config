@@ -20,6 +20,7 @@ local weaEmoji = {
     default = '⌛'
 }
 
+-- 获取天气对应的 emoji
 local function getWeaEmoji(weatherInfoCN)
     local weatherInfoPY = "default"
     if weatherInfoCN == "雷" then
@@ -44,6 +45,7 @@ local function getWeaEmoji(weatherInfoCN)
     return weaEmoji[weatherInfoPY]
 end
 
+-- 获取天气信息
 function GetWeather(menubar, menuData)
     print("更新天气")
 
@@ -52,23 +54,23 @@ function GetWeather(menubar, menuData)
             print('get weather error:'..code)
             return
         end
-        local rawjson = hs.json.decode(body)
-        local city = rawjson.city
-        local publish_time = rawjson.publish_time
-        local weather = rawjson.weather
-        local wind = rawjson.wind
+        local rawJson = hs.json.decode(body)
+        local city = rawJson.city
+        local publish_time = rawJson.publish_time
+        local weather = rawJson.weather
+        local wind = rawJson.wind
         menuData = {}
 
         menubar:setTitle(getWeaEmoji(weather.info)..math.floor(weather.temperature).." "..weather.info)
 
-        local dateTable = formatTimeToDateTable(publish_time, "%Y-%m-%d %H:%M")
+        local dateTable = FormatTimeToDateTable(publish_time, "%Y-%m-%d %H:%M")
 
         local tipStr = string.format("更新于 %s-%s %s:%s", dateTable.month, dateTable.day, dateTable.hour, dateTable.minute)
         menubar:setTooltip(tipStr)
-        local titlestr = string.format("%s %s日（今天） 🌡️%s℃ 💧%s 💨%s 🌬%s %s", getWeaEmoji(weather.info), dateTable.day, weather.temperature, weather.rain, weather.humidity, wind.power, weather.info)
+        local titleStr = string.format("%s %s日（今天） 🌡️%s℃ 💧%s 💨%s 🌬%s %s", getWeaEmoji(weather.info), dateTable.day, weather.temperature, weather.rain, weather.humidity, wind.power, weather.info)
 
         local firstLine = {
-            title = titlestr,
+            title = titleStr,
             fn = function()
                 hs.urlevent.openURL(detailsUrl)
             end
@@ -76,26 +78,26 @@ function GetWeather(menubar, menuData)
         table.insert(menuData, firstLine)
         table.insert(menuData, {title = '-'})
 
-        code, body, htable = hs.http.doRequest(urlApi, "GET", nil, nil)
+        code, body, _ = hs.http.doRequest(urlApi, "GET", nil, nil)
         if code ~= 200 then
             print('get weather error:'..code..'url: '..urlApi)
             return
         end
 
-        rawjson = hs.json.decode(body)
-        city = rawjson.city
-        for k, v in pairs(rawjson.data) do
+        rawJson = hs.json.decode(body)
+        city = rawJson.city
+        for k, v in pairs(rawJson.data) do
             if k == 1 then
                 local subMenu = {}
                 for _k, _v in pairs(v.hours) do
-                    local _titlestr = string.format("%s %s %s", _v.hours, _v.tem, _v.wea)
-                    local _item = { title = _titlestr }
+                    local _titleStr = string.format("%s %s %s", _v.hours, _v.tem, _v.wea)
+                    local _item = { title = _titleStr }
                     table.insert(subMenu, _item)
                 end
                 firstLine['menu'] = subMenu
             else
-                titlestr = string.format("%s %s 🌡️%s 🌬%s %s", weaEmoji[v.wea_img],v.day, v.tem, v.win_speed, v.wea)
-                local item = { title = titlestr }
+                titleStr = string.format("%s %s 🌡️%s 🌬%s %s", weaEmoji[v.wea_img],v.day, v.tem, v.win_speed, v.wea)
+                local item = { title = titleStr }
                 table.insert(menuData, item)
             end
         end
@@ -103,6 +105,7 @@ function GetWeather(menubar, menuData)
     end)
 end
 
+-- 注册天气组件
 function RegisterWeatherComponent()
     local menubar = hs.menubar.new()
     local menuData = {}
@@ -110,7 +113,7 @@ function RegisterWeatherComponent()
     menubar:setTitle('⌛')
     menubar:setTooltip("Weather Info")
 
-    GetWeather()
+    GetWeather(menubar, menuData)
 
     local weatherTimer = hs.timer.new(600, GetWeather)
     return weatherTimer

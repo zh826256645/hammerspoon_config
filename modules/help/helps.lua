@@ -33,7 +33,7 @@ local function windowHelps(menuData)
     table.insert(subProgramMenuData, { title="Netease         ⌃⌘W"})
 end
 
-function updateHelpMenu(menuBar, menuData)
+local function updateHelpMenu(menuBar, menuData)
     menuBar:setMenu(menuData)
 end
 
@@ -45,6 +45,9 @@ function RegisterHelpMenu()
     helpMenubar:setTooltip("helps")
     helpMenubar:setTitle("🔖")
 
-    updateHelpMenu(helpMenubar, menuData)
     windowHelps(menuData)
+
+    updateHelpMenu(helpMenubar, menuData)
+
+    return helpMenubar
 end

@@ -24,23 +24,23 @@ BindWindowMoveScreen()
 BindWindowFocusSwitch()
 
 -- 天气组件
-local weatherComponent = RegisterWeatherComponent()
-weatherComponent:start()
+WeatherComponent = RegisterWeatherComponent()
+WeatherComponent:start()
 
 -- 绑定软件快捷键
 BindApplicationShortcut()
 
 -- 注册监控
-local monitor = RegisterMonitor()
-monitor:start()
+Monitor = RegisterMonitor()
+Monitor:start()
 
 -- 注册剪贴板监控
-local pasteboardWatcher = RegisterPasteboardWatcher()
-pasteboardWatcher:start()
+PasteboardWatcher = RegisterPasteboardWatcher()
+PasteboardWatcher:start()
 
 -- 注册 wifi 监控
-local wifiWatcher = RegisterWifiWatcher()
-wifiWatcher:start()
+WifiWatcher = RegisterWifiWatcher()
+WifiWatcher:start()
 
 -- 注册帮助面板
-RegisterHelpMenu()
+HelpMenubar = RegisterHelpMenu()

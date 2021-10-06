@@ -28,9 +28,9 @@ function BindWindowSnap()
         {'lowerLeftSnap', ShiftCtrlAltHyper, 'Down', '[0,50,50,100]'},
     }
     for _, value in ipairs(settings) do
-        hotkey.bind(value[1], value[2], function()
+        hotkey.bind(value[2], value[3], function()
             if window.focusedWindow() then
-                window.focusedWindow():moveToUnit(value[3])
+                window.focusedWindow():moveToUnit(value[4])
             else
                 alert.show("No active window")
             end
@@ -114,7 +114,7 @@ function BindWindowMoveScreen()
 
     -- 将窗口移动到指定编号的窗口
     for number=1,3 do
-        hotkey.bind(hyperShift, tostring(number), function()
+        hotkey.bind(ShiftAltHyper, tostring(number), function()
             local win = window.focusedWindow()
             moveto(win, number)
         end)
@@ -139,7 +139,8 @@ local function focusScreen(switchScreen)
 
     -- 移动光标到屏幕中心
     local pt = geometry.rectMidPoint(switchScreen:fullFrame())
-    mouse.setAbsolutePosition(pt)
+    -- mouse.setAbsolutePosition(pt)
+    mouse.absolutePosition(pt)
 end
 
 -- 绑定窗口焦点切换
@@ -160,6 +161,7 @@ function BindWindowFocusSwitch()
         local nextScreen = currentScreen:next()
         local rect = nextScreen:fullFrame()
         local center = geometry.rectMidPoint(rect)
-        mouse.setAbsolutePosition(center)
+        -- mouse.setAbsolutePosition(center)
+        mouse.absolutePosition(center)
     end)
 end

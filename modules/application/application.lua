@@ -54,8 +54,8 @@ function BindApplicationShortcut()
         {'Netease', CmdCtrlHyper, 'W', TheNeteaseID},
     }
     for _, value in ipairs(settings) do
-        hs.hotkey.bind(value[1], value[2], function()
-            hs.application.open(value[3])
+        hs.hotkey.bind(value[2], value[3], function()
+            hs.application.open(value[4])
         end)
     end
 end
