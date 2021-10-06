@@ -45,8 +45,11 @@ local function getWeaEmoji(weatherInfoCN)
     return weaEmoji[weatherInfoPY]
 end
 
+WeatherMenubar = hs.menubar.new()
+local menuData = {}
+
 -- 获取天气信息
-function GetWeather(menubar, menuData)
+function GetWeather()
     print("更新天气")
 
     hs.http.doAsyncRequest(string.format(currentWeatherUrl, cityId), "GET", nil, nil, function(code, body, htable)
@@ -61,12 +64,12 @@ function GetWeather(menubar, menuData)
         local wind = rawJson.wind
         menuData = {}
 
-        menubar:setTitle(getWeaEmoji(weather.info)..math.floor(weather.temperature).." "..weather.info)
+        WeatherMenubar:setTitle(getWeaEmoji(weather.info)..math.floor(weather.temperature).." "..weather.info)
 
         local dateTable = FormatTimeToDateTable(publish_time, "%Y-%m-%d %H:%M")
 
         local tipStr = string.format("更新于 %s-%s %s:%s", dateTable.month, dateTable.day, dateTable.hour, dateTable.minute)
-        menubar:setTooltip(tipStr)
+        WeatherMenubar:setTooltip(tipStr)
         local titleStr = string.format("%s %s日（今天） 🌡️%s℃ 💧%s 💨%s 🌬%s %s", getWeaEmoji(weather.info), dateTable.day, weather.temperature, weather.rain, weather.humidity, wind.power, weather.info)
 
         local firstLine = {
@@ -101,19 +104,16 @@ function GetWeather(menubar, menuData)
                 table.insert(menuData, item)
             end
         end
-        menubar:setMenu(menuData)
+        WeatherMenubar:setMenu(menuData)
     end)
 end
 
 -- 注册天气组件
 function RegisterWeatherComponent()
-    WeatherMenubar = hs.menubar.new()
-    local menuData = {}
-
     WeatherMenubar:setTitle('⌛')
     WeatherMenubar:setTooltip("Weather Info")
 
-    GetWeather(WeatherMenubar, menuData)
+    GetWeather()
 
     local weatherTimer = hs.timer.new(600, GetWeather)
     return weatherTimer
