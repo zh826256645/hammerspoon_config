@@ -12,6 +12,7 @@ local function closeAfter(sec)
             CloseApplication(TheWeChatBundleID)
             CloseMyBluetooth()
             BluetoothSwitch(0)
+            WifiSwitch(0)
         else
             print("取消关闭 "..name.." 与 蓝牙")
         end
@@ -26,8 +27,9 @@ local function openAfter(sec)
     hs.timer.doAfter(sec, function()
         if (nowStatus ~= hs.caffeinate.watcher.screensDidSleep) then
             BluetoothSwitch(1)
+            WifiSwitch(1)
         else
-            print("取消打开蓝牙")
+            print("取消打开蓝牙与 Wi-Fi")
         end
     end
     )

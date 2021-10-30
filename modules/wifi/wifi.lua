@@ -50,3 +50,16 @@ function RegisterWifiWatcher()
     local wifiWatcher = hs.wifi.watcher.new(ssidChangedCallback)
     return wifiWatcher
 end
+
+
+-- 开关 Wi-Fi
+function WifiSwitch(state)
+    if state == 1 then
+        print("开启 Wi-Fi")
+        hs.notify.new({title="Wi-Fi", informativeText="开启 Wi-Fi"}):send()
+        hs.wifi.setPower(true)
+    elseif state == 0 then
+        print('关闭 Wi-Fi')
+        hs.wifi.setPower(false)
+    end
+end
