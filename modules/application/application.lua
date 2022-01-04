@@ -12,6 +12,7 @@ TheNotionID = "notion.id"
 TheScrollReverserID = "com.pilotmoon.scroll-reverser"
 TheReederID = "com.reederapp.macOS"
 TheNeteaseID = "com.netease.163music"
+TheQQMusicID = "com.tencent.QQMusicMac"
 
 -- 关闭程序
 function CloseApplication(bundleID)
@@ -52,6 +53,7 @@ function BindApplicationShortcut()
         {'Notion', CmdCtrlHyper, 'N', TheNotionID},
         {'Reeder', CmdCtrlHyper, 'R', TheReederID},
         {'Netease', CmdCtrlHyper, 'W', TheNeteaseID},
+        {'QQMusic', CmdCtrlHyper, 'Y', TheQQMusicID},
     }
     for _, value in ipairs(settings) do
         hs.hotkey.bind(value[2], value[3], function()

@@ -31,6 +31,7 @@ local function windowHelps(menuData)
     table.insert(subProgramMenuData, { title="Notion            ⌃⌘N"})
     table.insert(subProgramMenuData, { title="Reeder           ⌃⌘R"})
     table.insert(subProgramMenuData, { title="Netease         ⌃⌘W"})
+    table.insert(subProgramMenuData, { title="QQMusic        ⌃⌘Y"})
 end
 
 local function updateHelpMenu(menuBar, menuData)
