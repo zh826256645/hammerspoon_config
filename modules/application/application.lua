@@ -4,6 +4,7 @@ TheWeChatBundleID = "com.tencent.xinWeChat"
 TheQQBundleID = "com.tencent.qq"
 TheFinderID = "com.apple.finder"
 TheIterm2ID = "com.googlecode.iterm2"
+TheAlacrittyID = "io.alacritty"
 TheQQID = 'com.tencent.mqq'
 TheChromeID = "com.google.Chrome"
 TheVSCodeID = "com.microsoft.VSCode"
@@ -46,7 +47,8 @@ end
 function BindApplicationShortcut()
     local settings = {
         {'Finder', CmdHyper, 'E', TheFinderID},
-        {'Iterm2', CtrlAltHyper, 'T', TheIterm2ID},
+        -- {'Iterm2', CtrlAltHyper, 'T', TheIterm2ID},
+        {'Alacritty', CtrlAltHyper, 'T', TheAlacrittyID},
         {'Chrome', CmdCtrlHyper, 'G', TheChromeID},
         {'VSCode', CmdCtrlHyper, 'V', TheVSCodeID},
         {'Launchpad', CmdCtrlHyper, 'L', TheLaunchpadID},

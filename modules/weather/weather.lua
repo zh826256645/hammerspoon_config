@@ -82,25 +82,30 @@ function GetWeather()
         table.insert(menuData, firstLine)
         table.insert(menuData, {title = '-'})
 
-        -- code, body, _ = hs.http.doRequest(urlApi, "GET", nil, nil)
-        code, body, _ = hs.http.doRequest(string.format(detailWeatherUrl, cityId, tostring(os.time())), "GET", nil, nil)
+        code, body, _ = hs.http.doRequest(urlApi, "GET", nil, nil)
+        -- code, body, _ = hs.http.doRequest(string.format(detailWeatherUrl, cityId, tostring(os.time())), "GET", nil, nil)
         if code ~= 200 then
             print('get weather error:'..code..'url: '..urlApi)
             return
         end
 
         rawJson = hs.json.decode(body)
-        for k, v in pairs(rawJson.data.predict.detail) do
+        city = rawJson.city
+        -- for k, v in pairs(rawJson.data.predict.detail) do
+        for k, v in pairs(rawJson.data) do
             if k == 1 then
                 local subMenu = {}
-                for _, _v in pairs(rawJson.data.passedchart) do
-                    local _titleStr = string.format("%s 🌡️%s 💧%s 💨%s 🌬%s", _v.time, _v.temperature, _v.rain1h, _v.humidity, _v.windSpeed)
+                -- for _, _v in pairs(rawJson.data.passedchart) do
+                    -- local _titleStr = string.format("%s 🌡️%s 💧%s 💨%s 🌬%s", _v.time, _v.temperature, _v.rain1h, _v.humidity, _v.windSpeed)
+                for _k, _v in pairs(v.hours) do
+                    local _titleStr = string.format("%s %s %s", _v.hours, _v.tem, _v.wea)
                     local _item = { title = _titleStr }
                     table.insert(subMenu, _item)
                 end
                 firstLine['menu'] = subMenu
             else
-                titleStr = string.format("%s %s 🌞🌡️%s %s %s —— 🌜🌡️%s %s %s", getWeaEmoji(v.day.weather.info),v.date, v.day.weather.temperature, v.day.wind.power, v.day.weather.info,v.night.weather.temperature, v.night.wind.power, v.night.weather.info)
+                -- titleStr = string.format("%s %s 🌞🌡️%s %s %s —— 🌜🌡️%s %s %s", getWeaEmoji(v.day.weather.info),v.date, v.day.weather.temperature, v.day.wind.power, v.day.weather.info,v.night.weather.temperature, v.night.wind.power, v.night.weather.info)
+                titleStr = string.format("%s %s 🌡️%s 🌬%s %s", weaEmoji[v.wea_img],v.day, v.tem, v.win_speed, v.wea)
                 local item = { title = titleStr }
                 table.insert(menuData, item)
             end
