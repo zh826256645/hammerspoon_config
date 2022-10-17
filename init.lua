@@ -10,6 +10,7 @@ require "modules/application/application"
 require "modules/monitor/monitor"
 require "modules/pasteboard/pasteboard"
 require "modules/wifi/wifi"
+require "modules/input_method/input_method"
 require "modules/help/helps"
 
 -- 绑定窗口吸附
@@ -44,3 +45,6 @@ WifiWatcher:start()
 
 -- 注册帮助面板
 RegisterHelpMenu()
+
+-- 注册输入法提示
+RemindCurrentInputMethod()
