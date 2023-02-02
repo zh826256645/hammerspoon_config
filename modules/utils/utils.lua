@@ -86,3 +86,8 @@ function PrintTable(table)
 		sub_printTable(table, "  ")
 	end
 end
+
+-- 休眠
+function Sleep(n)
+	os.execute("sleep " .. n)
+ end

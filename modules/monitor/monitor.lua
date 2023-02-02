@@ -11,6 +11,9 @@ local function closeAfter(sec)
         if (nowStatus ~= hs.caffeinate.watcher.screensDidUnlock) then
             CloseApplication(TheWeChatBundleID)
             CloseMyBluetooth()
+
+            Sleep(2)
+
             BluetoothSwitch(0)
             WifiSwitch(0)
         else
