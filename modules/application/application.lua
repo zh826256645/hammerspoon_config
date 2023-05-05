@@ -5,6 +5,7 @@ TheQQBundleID = "com.tencent.qq"
 TheFinderID = "com.apple.finder"
 TheIterm2ID = "com.googlecode.iterm2"
 TheAlacrittyID = "io.alacritty"
+TheWarpID = "dev.warp.Warp-Stable"
 TheQQID = 'com.tencent.mqq'
 TheChromeID = "com.google.Chrome"
 TheVSCodeID = "com.microsoft.VSCode"
@@ -22,7 +23,7 @@ function CloseApplication(bundleID)
 
     if application ~= nil and application:isRunning() then
         local name = string.split(bundleID, '.')[3]
-        print("关闭 "..name.." 程序")
+        print("关闭 " .. name .. " 程序")
         application:kill()
     end
 end
@@ -33,7 +34,7 @@ function OpenApplication(bundleID)
     application = application[1]
     if application == nil or not application:isRunning() then
         local name = string.split(bundleID, '.')[3]
-        print("开启 "..name.." 程序")
+        print("开启 " .. name .. " 程序")
         hs.application.open(bundleID)
     end
 end
@@ -46,16 +47,17 @@ end
 -- 绑定程序
 function BindApplicationShortcut()
     local settings = {
-        {'Finder', CmdHyper, 'E', TheFinderID},
+        { 'Finder',    CmdHyper,     'E', TheFinderID },
         -- {'Iterm2', CtrlAltHyper, 'T', TheIterm2ID},
-        {'Alacritty', CtrlAltHyper, 'T', TheAlacrittyID},
-        {'Chrome', CmdCtrlHyper, 'G', TheChromeID},
-        {'VSCode', CmdCtrlHyper, 'V', TheVSCodeID},
-        {'Launchpad', CmdCtrlHyper, 'L', TheLaunchpadID},
-        {'Notion', CmdCtrlHyper, 'N', TheNotionID},
-        {'Reeder', CmdCtrlHyper, 'R', TheReederID},
-        {'Netease', CmdCtrlHyper, 'W', TheNeteaseID},
-        {'QQMusic', CmdCtrlHyper, 'Y', TheQQMusicID},
+        { 'Alacritty', CtrlAltHyper, 'T', TheAlacrittyID },
+        -- { 'Warp',      CtrlAltHyper, 'T', TheWarpID },
+        { 'Chrome',    CmdCtrlHyper, 'G', TheChromeID },
+        { 'VSCode',    CmdCtrlHyper, 'V', TheVSCodeID },
+        { 'Launchpad', CmdCtrlHyper, 'L', TheLaunchpadID },
+        { 'Notion',    CmdCtrlHyper, 'N', TheNotionID },
+        { 'Reeder',    CmdCtrlHyper, 'R', TheReederID },
+        { 'Netease',   CmdCtrlHyper, 'W', TheNeteaseID },
+        { 'QQMusic',   CmdCtrlHyper, 'Y', TheQQMusicID },
     }
     for _, value in ipairs(settings) do
         hs.hotkey.bind(value[2], value[3], function()
