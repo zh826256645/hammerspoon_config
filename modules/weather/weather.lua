@@ -5,7 +5,8 @@ local currentWeatherUrl = 'http://www.nmc.cn/f/rest/real/%s'
 local weatherPageUrl = 'http://www.nmc.cn/publish/forecast/AGD/meizhou.html'
 local detailWeatherUrl = 'http://www.nmc.cn/rest/weather?stationid=%s&_=%s000'
 
-local urlApi = 'https://www.tianqiapi.com/api/?version=v1&appid=42598848&appsecret=7IDFGj4z'
+-- local urlApi = 'https://www.tianqiapi.com/api/?version=v1&appid=42598848&appsecret=7IDFGj4z'
+local urlApi = 'https://v0.yiketianqi.com/api?unescape=1&version=v9&appid=54698688&appsecret=C6OgptjU'
 
 local weaEmoji = {
     lei = '⚡️',
@@ -55,7 +56,7 @@ function GetWeather()
 
     hs.http.doAsyncRequest(string.format(currentWeatherUrl, cityId), "GET", nil, nil, function(code, body, htable)
         if code ~= 200 then
-            print('get weather error:'..code)
+            print('get weather error:' .. code)
             return
         end
         local rawJson = hs.json.decode(body)
@@ -65,13 +66,16 @@ function GetWeather()
         local wind = rawJson.wind
         menuData = {}
 
-        WeatherMenubar:setTitle(getWeaEmoji(weather.info)..math.floor(weather.temperature).." "..weather.info)
+        WeatherMenubar:setTitle(getWeaEmoji(weather.info) .. math.floor(weather.temperature) .. " " .. weather.info)
 
         local dateTable = FormatTimeToDateTable(publish_time, "%Y-%m-%d %H:%M")
 
-        local tipStr = string.format("更新于 %s-%s %s:%s", dateTable.month, dateTable.day, dateTable.hour, dateTable.minute)
+        local tipStr = string.format("更新于 %s-%s %s:%s", dateTable.month, dateTable.day, dateTable.hour,
+            dateTable.minute)
         WeatherMenubar:setTooltip(tipStr)
-        local titleStr = string.format("%s %s日（今天） 🌡️%s℃ 💧%s 💨%s 🌬%s %s", getWeaEmoji(weather.info), dateTable.day, weather.temperature, weather.rain, weather.humidity, wind.power, weather.info)
+        local titleStr = string.format("%s %s日（今天） 🌡️%s℃ 💧%s 💨%s 🌬%s %s",
+            getWeaEmoji(weather.info), dateTable.day, weather.temperature, weather.rain, weather.humidity, wind.power,
+            weather.info)
 
         local firstLine = {
             title = titleStr,
@@ -80,12 +84,12 @@ function GetWeather()
             end
         }
         table.insert(menuData, firstLine)
-        table.insert(menuData, {title = '-'})
+        table.insert(menuData, { title = '-' })
 
         code, body, _ = hs.http.doRequest(urlApi, "GET", nil, nil)
         -- code, body, _ = hs.http.doRequest(string.format(detailWeatherUrl, cityId, tostring(os.time())), "GET", nil, nil)
         if code ~= 200 then
-            print('get weather error:'..code..'url: '..urlApi)
+            print('get weather error:' .. code .. 'url: ' .. urlApi)
             return
         end
 
@@ -96,7 +100,7 @@ function GetWeather()
             if k == 1 then
                 local subMenu = {}
                 -- for _, _v in pairs(rawJson.data.passedchart) do
-                    -- local _titleStr = string.format("%s 🌡️%s 💧%s 💨%s 🌬%s", _v.time, _v.temperature, _v.rain1h, _v.humidity, _v.windSpeed)
+                -- local _titleStr = string.format("%s 🌡️%s 💧%s 💨%s 🌬%s", _v.time, _v.temperature, _v.rain1h, _v.humidity, _v.windSpeed)
                 for _k, _v in pairs(v.hours) do
                     local _titleStr = string.format("%s %s %s", _v.hours, _v.tem, _v.wea)
                     local _item = { title = _titleStr }
@@ -105,7 +109,8 @@ function GetWeather()
                 firstLine['menu'] = subMenu
             else
                 -- titleStr = string.format("%s %s 🌞🌡️%s %s %s —— 🌜🌡️%s %s %s", getWeaEmoji(v.day.weather.info),v.date, v.day.weather.temperature, v.day.wind.power, v.day.weather.info,v.night.weather.temperature, v.night.wind.power, v.night.weather.info)
-                titleStr = string.format("%s %s 🌡️%s 🌬%s %s", weaEmoji[v.wea_img],v.day, v.tem, v.win_speed, v.wea)
+                titleStr = string.format("%s %s 🌡️%s 🌬%s %s", weaEmoji[v.wea_img], v.day, v.tem, v.win_speed,
+                    v.wea)
                 local item = { title = titleStr }
                 table.insert(menuData, item)
             end
