@@ -5,8 +5,8 @@ local currentWeatherUrl = 'http://www.nmc.cn/f/rest/real/%s'
 local weatherPageUrl = 'http://www.nmc.cn/publish/forecast/AGD/meizhou.html'
 local detailWeatherUrl = 'http://www.nmc.cn/rest/weather?stationid=%s&_=%s000'
 
--- local urlApi = 'https://www.tianqiapi.com/api/?version=v1&appid=42598848&appsecret=7IDFGj4z'
-local urlApi = 'https://v0.yiketianqi.com/api?unescape=1&version=v9&appid=54698688&appsecret=C6OgptjU'
+local urlApi = 'https://www.tianqiapi.com/api/?version=v1&appid=42598848&appsecret=7IDFGj4z'
+-- local urlApi = 'https://v0.yiketianqi.com/api?unescape=1&version=v9&appid=54698688&appsecret=C6OgptjU'
 
 local weaEmoji = {
     lei = '⚡️',
