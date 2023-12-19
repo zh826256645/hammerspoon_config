@@ -15,6 +15,7 @@ TheScrollReverserID = "com.pilotmoon.scroll-reverser"
 TheReederID = "com.reederapp.macOS"
 TheNeteaseID = "com.netease.163music"
 TheQQMusicID = "com.tencent.QQMusicMac"
+TheSpotifyID = "com.spotify.client"
 
 -- 关闭程序
 function CloseApplication(bundleID)
@@ -58,6 +59,7 @@ function BindApplicationShortcut()
         { 'Reeder',    CmdCtrlHyper, 'R', TheReederID },
         { 'Netease',   CmdCtrlHyper, 'W', TheNeteaseID },
         { 'QQMusic',   CmdCtrlHyper, 'Y', TheQQMusicID },
+        { 'Spotify',   CmdCtrlHyper, 'S', TheSpotifyID },
     }
     for _, value in ipairs(settings) do
         hs.hotkey.bind(value[2], value[3], function()
