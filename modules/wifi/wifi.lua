@@ -9,8 +9,8 @@ local function currentScselectUid()
         result = result:gsub("^Defined sets include: %(%* == current set%)\r", "")
         result = result:gsub("/r/n", "")
         result = result:split("\r")
-        for k,v in ipairs(result) do
-            if v:sub(2,2) == '*' then
+        for k, v in ipairs(result) do
+            if v:sub(2, 2) == '*' then
                 v = v:gsub(" %* ", "")
                 v = v:sub(0, 36)
                 return v
@@ -19,7 +19,7 @@ local function currentScselectUid()
     end
 end
 
-local function ssidChangedCallback() -- 回调
+local function ssidChangedCallback()      -- 回调
     local ssid = hs.wifi.currentNetwork() -- 获取当前 WiFi ssid
     if (ssid ~= nil) then
         local currentUid = currentScselectUid()
@@ -27,20 +27,20 @@ local function ssidChangedCallback() -- 回调
         if (ssid == "TelkingNet_PC") then
             if (currentUid ~= companyUid) then
                 uid = companyUid
-                hs.notify.new({title="位置", informativeText="位置切换到公司"}):send()
+                hs.notify.new({ title = "位置", informativeText = "位置切换到公司" }):send()
             end
         elseif (ssid == "zhhh_5G") then
             if (currentUid ~= homeUid) then
                 uid = homeUid
-                hs.notify.new({title="位置", informativeText="位置切换到家里"}):send()
+                hs.notify.new({ title = "位置", informativeText = "位置切换到家里" }):send()
             end
         elseif (currentUid ~= defaultUid) then
             uid = defaultUid
-            hs.notify.new({title="位置", informativeText="位置切换到自动"}):send()
+            hs.notify.new({ title = "位置", informativeText = "位置切换到自动" }):send()
         end
 
         if (uid ~= nil) then
-            os.execute("scselect " ..uid .." > /dev/null") -- 切换网络位置
+            os.execute("scselect " .. uid .. " > /dev/null") -- 切换网络位置
         end
     end
 end
@@ -51,12 +51,11 @@ function RegisterWifiWatcher()
     return wifiWatcher
 end
 
-
 -- 开关 Wi-Fi
 function WifiSwitch(state)
     if state == 1 then
         print("开启 Wi-Fi")
-        hs.notify.new({title="Wi-Fi", informativeText="开启 Wi-Fi"}):send()
+        hs.notify.new({ title = "Wi-Fi", informativeText = "开启 Wi-Fi" }):send()
         hs.wifi.setPower(true)
     elseif state == 0 then
         print('关闭 Wi-Fi')

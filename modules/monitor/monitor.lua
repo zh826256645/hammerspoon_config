@@ -5,7 +5,7 @@ local function closeAfter(sec)
     -- 关闭微信
     local name = string.split(TheWeChatBundleID, '.')[3]
 
-    print(sec.." 秒后如果屏幕依然未解锁，将关闭 "..name.." 与断开蓝牙耳机")
+    print(sec .. " 秒后如果屏幕依然未解锁，将关闭 " .. name .. " 与断开蓝牙耳机")
 
     hs.timer.doAfter(sec, function()
         if (nowStatus ~= hs.caffeinate.watcher.screensDidUnlock) then
@@ -17,7 +17,7 @@ local function closeAfter(sec)
             BluetoothSwitch(0)
             WifiSwitch(0)
         else
-            print("取消关闭 "..name.." 与 蓝牙")
+            print("取消关闭 " .. name .. " 与 蓝牙")
         end
     end
     )
@@ -25,7 +25,7 @@ end
 
 -- 多少秒后开启程序
 local function openAfter(sec)
-    print(sec.." 秒后如果屏幕未休眠，将打开蓝牙")
+    print(sec .. " 秒后如果屏幕未休眠，将打开蓝牙")
 
     hs.timer.doAfter(sec, function()
         if (nowStatus ~= hs.caffeinate.watcher.screensDidSleep) then
@@ -56,7 +56,7 @@ local function caffeinateCallback(eventType)
         print("解锁")
         -- blueUtils:connectBluetooth(MyBlueDeviceID) --
         -- bluetoothSwitch(1)
-        GetWeather()
+        -- GetWeather()
         OpenApplication(TheScrollReverserID)
     end
 end

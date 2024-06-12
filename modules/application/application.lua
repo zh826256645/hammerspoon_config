@@ -16,6 +16,7 @@ TheReederID = "com.reederapp.macOS"
 TheNeteaseID = "com.netease.163music"
 TheQQMusicID = "com.tencent.QQMusicMac"
 TheSpotifyID = "com.spotify.client"
+TheYouTubeMusicID = "com.google.Chrome.app.cinhimbnkkaeohfgghhklpknlkffjgod"
 
 -- 关闭程序
 function CloseApplication(bundleID)
@@ -48,18 +49,19 @@ end
 -- 绑定程序
 function BindApplicationShortcut()
     local settings = {
-        { 'Finder',    CmdHyper,     'E', TheFinderID },
+        { 'Finder',         CmdHyper,     'E', TheFinderID },
         -- {'Iterm2', CtrlAltHyper, 'T', TheIterm2ID},
-        { 'Alacritty', CtrlAltHyper, 'T', TheAlacrittyID },
+        { 'Alacritty',      CtrlAltHyper, 'T', TheAlacrittyID },
         -- { 'Warp',      CtrlAltHyper, 'T', TheWarpID },
-        { 'Chrome',    CmdCtrlHyper, 'G', TheChromeID },
-        { 'VSCode',    CmdCtrlHyper, 'V', TheVSCodeID },
-        { 'Launchpad', CmdCtrlHyper, 'L', TheLaunchpadID },
-        { 'Notion',    CmdCtrlHyper, 'N', TheNotionID },
-        { 'Reeder',    CmdCtrlHyper, 'R', TheReederID },
-        { 'Netease',   CmdCtrlHyper, 'W', TheNeteaseID },
-        { 'QQMusic',   CmdCtrlHyper, 'Y', TheQQMusicID },
-        { 'Spotify',   CmdCtrlHyper, 'S', TheSpotifyID },
+        { 'Chrome',         CmdCtrlHyper, 'G', TheChromeID },
+        { 'VSCode',         CmdCtrlHyper, 'V', TheVSCodeID },
+        { 'Launchpad',      CmdCtrlHyper, 'L', TheLaunchpadID },
+        { 'Notion',         CmdCtrlHyper, 'N', TheNotionID },
+        { 'Reeder',         CmdCtrlHyper, 'R', TheReederID },
+        { 'Netease',        CmdCtrlHyper, 'W', TheNeteaseID },
+        { 'QQMusic',        CmdCtrlHyper, 'Y', TheQQMusicID },
+        { 'Spotify',        CmdCtrlHyper, 'S', TheSpotifyID },
+        { 'YouTubeMusicID', CmdCtrlHyper, 'M', TheYouTubeMusicID },
     }
     for _, value in ipairs(settings) do
         hs.hotkey.bind(value[2], value[3], function()
