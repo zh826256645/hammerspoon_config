@@ -17,6 +17,7 @@ TheNeteaseID = "com.netease.163music"
 TheQQMusicID = "com.tencent.QQMusicMac"
 TheSpotifyID = "com.spotify.client"
 TheYouTubeMusicID = "com.google.Chrome.app.cinhimbnkkaeohfgghhklpknlkffjgod"
+ThePodcastsMusicID = "com.apple.podcasts"
 
 -- 关闭程序
 function CloseApplication(bundleID)
@@ -62,6 +63,7 @@ function BindApplicationShortcut()
         { 'QQMusic',        CmdCtrlHyper, 'Y', TheQQMusicID },
         { 'Spotify',        CmdCtrlHyper, 'S', TheSpotifyID },
         { 'YouTubeMusicID', CmdCtrlHyper, 'M', TheYouTubeMusicID },
+        { 'ThePodcastsMusicID', CmdCtrlHyper, 'P', ThePodcastsMusicID },
     }
     for _, value in ipairs(settings) do
         hs.hotkey.bind(value[2], value[3], function()

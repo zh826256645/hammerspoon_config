@@ -1,5 +1,5 @@
 -- 天气组件
-local cityId = '59117'
+local cityId = 'dEibM'
 local currentWeatherUrl = 'http://www.nmc.cn/f/rest/real/%s'
 -- local sevenDaysWeatherUrl = 'http://www.nmc.cn/f/rest/tempchart/%s'
 local weatherPageUrl = 'http://www.nmc.cn/publish/forecast/AGD/meixian.html'
@@ -39,7 +39,7 @@ local function getWeaEmoji(weatherInfoCN)
         weatherInfoPY = 'zhenyu'
     elseif weatherInfoCN == "阴" then
         weatherInfoPY = 'yin'
-    elseif string.find(weatherInfoCN, "雨") ~= nil then
+    elseif weatherInfoCN ~= nil and string.find(weatherInfoCN, "雨") ~= nil then
         weatherInfoPY = 'yu'
     end
     return weaEmoji[weatherInfoPY]
@@ -82,7 +82,6 @@ function GetWeather()
             end
         }
         table.insert(menuData, firstLine)
-        table.insert(menuData, { title = '-' })
 
         code, body, _ = hs.http.doRequest(string.format(detailWeatherUrl, cityId, tostring(os.time())), "GET", nil, nil)
         if code ~= 200 then
@@ -95,12 +94,18 @@ function GetWeather()
         for k, v in pairs(rawJson.data.predict.detail) do
             if k == 1 then
                 local subMenu = {}
-                for _, _v in pairs(rawJson.data.passedchart) do
-                    local _titleStr = string.format("%s 🌡️%s 💧%s 💨%s 🌬%s", _v.time, _v.temperature, _v.rain1h, _v.humidity, _v.windSpeed)
-                    local _item = { title = _titleStr }
-                    table.insert(subMenu, _item)
-                end
-                firstLine['menu'] = subMenu
+                -- for _, _v in pairs(rawJson.data.passedchart) do
+                --     local _titleStr = string.format("%s 🌡️%s 💧%s 💨%s 🌬%s", _v.time, _v.temperature, _v.rain1h, _v.humidity, _v.windSpeed)
+                --     local _item = { title = _titleStr }
+                --     table.insert(subMenu, _item)
+                -- end
+                os.execute("cd /Users/zhonghao/Projects/weather_landscape && /Users/zhonghao/miniconda3/envs/zhonghao/bin/python run_test.py")
+                local weatherImage = hs.image.imageFromPath("/Users/zhonghao/Projects/weather_landscape/tmp/test_03B3D811B884.bmp")
+                weatherImage:size({ w = 350, h = 150})
+
+                table.insert(menuData, {title = "", image = weatherImage})
+                table.insert(menuData, { title = '-' })
+                -- firstLine['menu'] = subMenu
             else
                 titleStr = string.format("%s %s 🌞🌡️%s %s %s —— 🌜🌡️%s %s %s", getWeaEmoji(v.day.weather.info),v.date, v.day.weather.temperature, v.day.wind.power, v.day.weather.info,v.night.weather.temperature, v.night.wind.power, v.night.weather.info)
                 local item = { title = titleStr }
