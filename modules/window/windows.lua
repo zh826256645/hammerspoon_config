@@ -11,6 +11,7 @@ local alert = require "hs.alert"
 local fnutils = require "hs.fnutils"
 local geometry = require "hs.geometry"
 local mouse = require "hs.mouse"
+local timer = require "hs.timer"
 
 -- default 0.2
 window.animationDuration = 0
@@ -41,27 +42,54 @@ end
 -- 记住窗口原来的大小
 -- 让窗口可以从最大的大小还原回原来的位置
 local frameCache = {}
-local function toggleMaximize()
+local fullScreenMoveDelay = 0.8
+
+local function withFocusedWindow(action)
     local win = window.focusedWindow()
-    if frameCache[win:id()] then
-        win:setFrame(frameCache[win:id()])
-        frameCache[win:id()] = nil
-    else
-        frameCache[win:id()] = win:frame()
-        win:maximize()
+    if not win then
+        alert.show("No active window")
+        return
     end
+    action(win)
+end
+
+local function moveAfterLeavingFullScreen(win, action)
+    if win:isFullScreen() then
+        win:toggleFullScreen()
+        timer.doAfter(fullScreenMoveDelay, function()
+            action(win)
+        end)
+        return
+    end
+    action(win)
+end
+
+local function toggleMaximize()
+    withFocusedWindow(function(win)
+        if frameCache[win:id()] then
+            win:setFrame(frameCache[win:id()])
+            frameCache[win:id()] = nil
+        else
+            frameCache[win:id()] = win:frame()
+            win:maximize()
+        end
+    end)
 end
 
 -- 绑定窗口位置
 function BindWindowLocation()
     -- 独占一个屏幕
     hotkey.bind(CmdCtrlAltHyper, 'F', function()
-        window.focusedWindow():toggleFullScreen()
+        withFocusedWindow(function(win)
+            win:toggleFullScreen()
+        end)
     end)
 
     -- 移至屏幕中心
     hotkey.bind(CmdCtrlAltHyper, 'C', function()
-        window.focusedWindow():centerOnScreen()
+        withFocusedWindow(function(win)
+            win:centerOnScreen()
+        end)
     end)
 
     -- 最大的窗口大小
@@ -104,19 +132,30 @@ end
 function BindWindowMoveScreen()
     -- 移动窗口到前一个屏幕
     hotkey.bind(ShiftAltHyper, "Left", function()
-        window.focusedWindow():moveOneScreenWest()
+        withFocusedWindow(function(win)
+            moveAfterLeavingFullScreen(win, function(targetWin)
+                targetWin:moveOneScreenWest()
+            end)
+        end)
     end)
 
     -- 移动窗口到后一个屏幕
     hotkey.bind(ShiftAltHyper, "Right", function()
-        window.focusedWindow():moveOneScreenEast()
+        withFocusedWindow(function(win)
+            moveAfterLeavingFullScreen(win, function(targetWin)
+                targetWin:moveOneScreenEast()
+            end)
+        end)
     end)
 
     -- 将窗口移动到指定编号的窗口
     for number=1,3 do
         hotkey.bind(ShiftAltHyper, tostring(number), function()
-            local win = window.focusedWindow()
-            moveto(win, number)
+            withFocusedWindow(function(win)
+                moveAfterLeavingFullScreen(win, function(targetWin)
+                    moveto(targetWin, number)
+                end)
+            end)
         end)
     end
 end
