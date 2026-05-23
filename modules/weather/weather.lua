@@ -7,7 +7,12 @@ local detailWeatherUrl = 'http://www.nmc.cn/rest/weather?stationid=%s&_=%s000'
 local weatherScriptDir = '/Users/zhonghao/Projects/weather_landscape'
 local weatherScriptPython = '/Users/zhonghao/miniconda3/envs/zhonghao/bin/python'
 local weatherScriptArgs = { 'run_test.py' }
-local weatherImagePath = '/Users/zhonghao/Projects/weather_landscape/tmp/test_03B3D811B884.bmp'
+local forecastJsonPath = '/Users/zhonghao/Projects/weather_landscape/tmp/openweathermap_fcst_03B3D811B884.json'
+local darkWeatherImagePath = '/Users/zhonghao/Projects/weather_landscape/tmp/landscape_rgb_b.png'
+local lightWeatherImagePath = '/Users/zhonghao/Projects/weather_landscape/tmp/landscape_rgb_w.png'
+local weatherAlertCooldownSeconds = 3 * 60 * 60
+local weatherAlertWindowSeconds = 3 * 60 * 60
+local weatherAlertSettingsKey = "weather.lastAbnormalAlertAt"
 
 
 local weaEmoji = {
@@ -22,6 +27,45 @@ local weaEmoji = {
     zhenyu = '🌧',
     yin = '☁️',
     default = '⌛'
+}
+
+local weatherDescriptionMap = {
+    ["thunderstorm"] = "雷暴",
+    ["light thunderstorm"] = "小雷暴",
+    ["heavy thunderstorm"] = "强雷暴",
+    ["drizzle"] = "毛毛雨",
+    ["light intensity drizzle"] = "小毛毛雨",
+    ["light rain"] = "小雨",
+    ["moderate rain"] = "中雨",
+    ["heavy intensity rain"] = "大雨",
+    ["very heavy rain"] = "暴雨",
+    ["extreme rain"] = "极端降雨",
+    ["freezing rain"] = "冻雨",
+    ["shower rain"] = "阵雨",
+    ["heavy intensity shower rain"] = "强阵雨",
+    ["ragged shower rain"] = "零散阵雨",
+    ["light snow"] = "小雪",
+    ["snow"] = "降雪",
+    ["heavy snow"] = "大雪",
+    ["sleet"] = "雨夹雪",
+    ["light shower sleet"] = "小阵性雨夹雪",
+    ["shower sleet"] = "阵性雨夹雪",
+    ["light rain and snow"] = "小雨夹雪",
+    ["rain and snow"] = "雨夹雪",
+    ["light shower snow"] = "小阵雪",
+    ["shower snow"] = "阵雪",
+    ["heavy shower snow"] = "强阵雪",
+    ["mist"] = "薄雾",
+    ["smoke"] = "烟雾",
+    ["haze"] = "霾",
+    ["sand/dust whirls"] = "扬沙",
+    ["fog"] = "雾",
+    ["sand"] = "沙",
+    ["dust"] = "浮尘",
+    ["volcanic ash"] = "火山灰",
+    ["squalls"] = "飑",
+    ["tornado"] = "龙卷风",
+    ["hail"] = "冰雹",
 }
 
 -- 获取天气对应的 emoji
@@ -53,6 +97,7 @@ WeatherMenubar = hs.menubar.new()
 local menuData = {}
 local weatherRequestId = 0
 local weatherImageTask = nil
+local settings = require "hs.settings"
 
 local function safeJsonDecode(body)
     if not body or body == '' then
@@ -61,8 +106,115 @@ local function safeJsonDecode(body)
     return hs.json.decode(body)
 end
 
+local function currentWeatherImagePath()
+    if hs.host.interfaceStyle() == "Dark" then
+        return darkWeatherImagePath
+    end
+    return lightWeatherImagePath
+end
+
+local function localizeWeatherDescription(weatherItem)
+    if not weatherItem then
+        return "异常天气"
+    end
+
+    local description = weatherItem.description
+    if description and weatherDescriptionMap[string.lower(description)] then
+        return weatherDescriptionMap[string.lower(description)]
+    end
+
+    local main = weatherItem.main
+    if main and weatherDescriptionMap[string.lower(main)] then
+        return weatherDescriptionMap[string.lower(main)]
+    end
+
+    return description or main or "异常天气"
+end
+
+local function readJsonFile(path)
+    local file = io.open(path, "r")
+    if not file then
+        return nil
+    end
+    local content = file:read("*a")
+    file:close()
+    return safeJsonDecode(content)
+end
+
+local function isAbnormalWeather(weatherItem)
+    if not weatherItem then
+        return false
+    end
+
+    local weatherId = weatherItem.id or 0
+    local main = weatherItem.main or ""
+
+    if weatherId >= 200 and weatherId < 700 then
+        return true
+    end
+
+    return main == "Tornado"
+        or main == "Squall"
+        or main == "Ash"
+        or main == "Sand"
+        or main == "Dust"
+        or main == "Fog"
+        or main == "Haze"
+        or main == "Smoke"
+end
+
+local function findUpcomingAbnormalForecast(forecastJson)
+    if not forecastJson or type(forecastJson.list) ~= "table" then
+        return nil
+    end
+
+    local now = os.time()
+    local deadline = now + weatherAlertWindowSeconds
+
+    for _, forecast in ipairs(forecastJson.list) do
+        local forecastTime = forecast.dt
+        if forecastTime and forecastTime >= now and forecastTime <= deadline then
+            local weatherList = forecast.weather or {}
+            for _, weatherItem in ipairs(weatherList) do
+                if isAbnormalWeather(weatherItem) then
+                    return forecast, weatherItem
+                end
+            end
+        end
+    end
+
+    return nil
+end
+
+local function maybeNotifyUpcomingAbnormalWeather()
+    local lastAlertAt = settings.get(weatherAlertSettingsKey) or 0
+    local now = os.time()
+    if now - lastAlertAt < weatherAlertCooldownSeconds then
+        return
+    end
+
+    local forecastJson = readJsonFile(forecastJsonPath)
+    local forecast, weatherItem = findUpcomingAbnormalForecast(forecastJson)
+    if not forecast or not weatherItem then
+        return
+    end
+
+    local whenText = forecast.dt_txt or os.date("%Y-%m-%d %H:%M", forecast.dt)
+    local description = localizeWeatherDescription(weatherItem)
+    local popText = ""
+    if forecast.pop then
+        popText = string.format("，降水概率 %.0f%%", forecast.pop * 100)
+    end
+
+    hs.notify.new({
+        title = "天气提醒",
+        informativeText = string.format("%s 预计有%s%s，注意出行。", whenText, description, popText)
+    }):send()
+    settings.set(weatherAlertSettingsKey, now)
+end
+
 local function setWeatherImage(menu)
-    local weatherImage = hs.image.imageFromPath(weatherImagePath)
+    local weatherImage = hs.image.imageFromPath(currentWeatherImagePath())
     if not weatherImage then
         return false
     end
@@ -123,6 +275,7 @@ local function buildWeatherImageAsync(currentRequestId, detailMenu)
         local nextMenu = hs.fnutils.copy(detailMenu)
         setWeatherImage(nextMenu)
         renderWeatherMenu(currentRequestId, nextMenu)
+        maybeNotifyUpcomingAbnormalWeather()
     end, weatherScriptArgs)
 
     if not weatherImageTask then
