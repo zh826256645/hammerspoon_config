@@ -18,6 +18,8 @@ function RemindCurrentInputMethod()
                 ShowUUID = hs.alert.show("中文", 0.8)
             elseif (currentSourceID == "im.rime.inputmethod.Squirrel.Hans") then
                 ShowUUID = hs.alert.show("鼠须管", 0.8)
+            elseif (currentSourceID == "com.tencent.inputmethod.wetype.pinyin") then
+                ShowUUID = hs.alert.show("微信输入法", 0.8)
             end
         end
     end)

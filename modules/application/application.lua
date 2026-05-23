@@ -4,10 +4,11 @@ TheWeChatBundleID = "com.tencent.xinWeChat"
 TheQQBundleID = "com.tencent.qq"
 TheFinderID = "com.apple.finder"
 TheIterm2ID = "com.googlecode.iterm2"
-TheAlacrittyID = "io.alacritty"
+TheAlacrittyID = "org.alacritty"
 TheWarpID = "dev.warp.Warp-Stable"
 TheQQID = 'com.tencent.mqq'
 TheChromeID = "com.google.Chrome"
+TheEdgeID = "com.microsoft.edgemac"
 TheVSCodeID = "com.microsoft.VSCode"
 TheLaunchpadID = "com.apple.launchpad.launcher"
 TheNotionID = "notion.id"
@@ -18,6 +19,7 @@ TheQQMusicID = "com.tencent.QQMusicMac"
 TheSpotifyID = "com.spotify.client"
 TheYouTubeMusicID = "com.google.Chrome.app.cinhimbnkkaeohfgghhklpknlkffjgod"
 ThePodcastsMusicID = "com.apple.podcasts"
+TheCodexID = "com.openai.codex"
 
 -- 关闭程序
 function CloseApplication(bundleID)
@@ -54,16 +56,18 @@ function BindApplicationShortcut()
         -- {'Iterm2', CtrlAltHyper, 'T', TheIterm2ID},
         { 'Alacritty',      CtrlAltHyper, 'T', TheAlacrittyID },
         -- { 'Warp',      CtrlAltHyper, 'T', TheWarpID },
-        { 'Chrome',         CmdCtrlHyper, 'G', TheChromeID },
+        -- { 'Chrome',         CmdCtrlHyper, 'G', TheChromeID },
+        { 'Chrome',         CmdCtrlHyper, 'G', TheEdgeID },
         { 'VSCode',         CmdCtrlHyper, 'V', TheVSCodeID },
         { 'Launchpad',      CmdCtrlHyper, 'L', TheLaunchpadID },
         { 'Notion',         CmdCtrlHyper, 'N', TheNotionID },
         { 'Reeder',         CmdCtrlHyper, 'R', TheReederID },
-        { 'Netease',        CmdCtrlHyper, 'W', TheNeteaseID },
-        { 'QQMusic',        CmdCtrlHyper, 'Y', TheQQMusicID },
-        { 'Spotify',        CmdCtrlHyper, 'S', TheSpotifyID },
-        { 'YouTubeMusicID', CmdCtrlHyper, 'M', TheYouTubeMusicID },
-        { 'ThePodcastsMusicID', CmdCtrlHyper, 'P', ThePodcastsMusicID },
+        -- { 'Netease',        CmdCtrlHyper, 'W', TheNeteaseID },
+        -- { 'QQMusic',        CmdCtrlHyper, 'Y', TheQQMusicID },
+        -- { 'Spotify',        CmdCtrlHyper, 'S', TheSpotifyID },
+        -- { 'YouTubeMusicID', CmdCtrlHyper, 'M', TheYouTubeMusicID },
+        { 'PodcastsMusic', CmdCtrlHyper, 'P', ThePodcastsMusicID },
+        { 'Codex', CmdCtrlHyper, 'Z', TheCodexID },
     }
     for _, value in ipairs(settings) do
         hs.hotkey.bind(value[2], value[3], function()

@@ -44,7 +44,7 @@ WifiWatcher = RegisterWifiWatcher()
 WifiWatcher:start()
 
 -- 注册帮助面板
-RegisterHelpMenu()
+-- RegisterHelpMenu()
 
 -- 注册输入法提示
 RemindCurrentInputMethod()
