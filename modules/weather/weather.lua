@@ -4,6 +4,10 @@ local currentWeatherUrl = 'http://www.nmc.cn/f/rest/real/%s'
 -- local sevenDaysWeatherUrl = 'http://www.nmc.cn/f/rest/tempchart/%s'
 local weatherPageUrl = 'http://www.nmc.cn/publish/forecast/AGD/meixian.html'
 local detailWeatherUrl = 'http://www.nmc.cn/rest/weather?stationid=%s&_=%s000'
+local weatherScriptDir = '/Users/zhonghao/Projects/weather_landscape'
+local weatherScriptPython = '/Users/zhonghao/miniconda3/envs/zhonghao/bin/python'
+local weatherScriptArgs = { 'run_test.py' }
+local weatherImagePath = '/Users/zhonghao/Projects/weather_landscape/tmp/test_03B3D811B884.bmp'
 
 
 local weaEmoji = {
@@ -47,17 +51,113 @@ end
 
 WeatherMenubar = hs.menubar.new()
 local menuData = {}
+local weatherRequestId = 0
+local weatherImageTask = nil
+
+local function safeJsonDecode(body)
+    if not body or body == '' then
+        return nil
+    end
+    return hs.json.decode(body)
+end
+
+local function setWeatherImage(menu)
+    local weatherImage = hs.image.imageFromPath(weatherImagePath)
+    if not weatherImage then
+        return false
+    end
+    weatherImage:size({ w = 350, h = 150 })
+    table.insert(menu, 2, { title = "", image = weatherImage })
+    table.insert(menu, 3, { title = '-' })
+    return true
+end
+
+local function buildDetailMenu(detailJson)
+    local detailMenu = {}
+    for k, v in ipairs(detailJson.data.predict.detail) do
+        if k ~= 1 then
+            local titleStr = string.format(
+                "%s %s 🌞🌡️%s %s %s —— 🌜🌡️%s %s %s",
+                getWeaEmoji(v.day.weather.info),
+                v.date,
+                v.day.weather.temperature,
+                v.day.wind.power,
+                v.day.weather.info,
+                v.night.weather.temperature,
+                v.night.wind.power,
+                v.night.weather.info
+            )
+            table.insert(detailMenu, { title = titleStr })
+        end
+    end
+    return detailMenu
+end
+
+local function renderWeatherMenu(currentRequestId, detailMenu)
+    if currentRequestId ~= weatherRequestId then
+        return
+    end
+    menuData = detailMenu
+    WeatherMenubar:setMenu(menuData)
+end
+
+local function buildWeatherImageAsync(currentRequestId, detailMenu)
+    if weatherImageTask and weatherImageTask:isRunning() then
+        weatherImageTask:terminate()
+    end
+
+    weatherImageTask = hs.task.new(weatherScriptPython, function(exitCode, stdOut, stdErr)
+        if exitCode ~= 0 then
+            print('weather image task error: ' .. tostring(exitCode))
+            if stdErr and stdErr ~= '' then
+                print(stdErr)
+            end
+            renderWeatherMenu(currentRequestId, detailMenu)
+            return
+        end
+
+        if currentRequestId ~= weatherRequestId then
+            return
+        end
+
+        local nextMenu = hs.fnutils.copy(detailMenu)
+        setWeatherImage(nextMenu)
+        renderWeatherMenu(currentRequestId, nextMenu)
+    end, weatherScriptArgs)
+
+    if not weatherImageTask then
+        print('weather image task create failed')
+        renderWeatherMenu(currentRequestId, detailMenu)
+        return
+    end
+
+    weatherImageTask:setWorkingDirectory(weatherScriptDir)
+
+    if not weatherImageTask:start() then
+        print('weather image task start failed')
+        renderWeatherMenu(currentRequestId, detailMenu)
+    end
+end
 
 -- 获取天气信息
 function GetWeather()
     print("更新天气")
+    weatherRequestId = weatherRequestId + 1
+    local currentRequestId = weatherRequestId
 
     hs.http.doAsyncRequest(string.format(currentWeatherUrl, cityId), "GET", nil, nil, function(code, body, htable)
+        if currentRequestId ~= weatherRequestId then
+            return
+        end
         if code ~= 200 then
             print('get weather error:' .. code)
             return
         end
-        local rawJson = hs.json.decode(body)
+        local rawJson = safeJsonDecode(body)
+        if not rawJson or not rawJson.weather or not rawJson.wind then
+            print('get weather decode error: current weather payload invalid')
+            return
+        end
         local city = rawJson.city
         local publish_time = rawJson.publish_time
         local weather = rawJson.weather
@@ -82,37 +182,32 @@ function GetWeather()
             end
         }
         table.insert(menuData, firstLine)
-
-        code, body, _ = hs.http.doRequest(string.format(detailWeatherUrl, cityId, tostring(os.time())), "GET", nil, nil)
-        if code ~= 200 then
-            print('get weather error:' .. code .. 'url: ' .. detailWeatherUrl)
-            return
-        end
-
-        rawJson = hs.json.decode(body)
-        city = rawJson.city
-        for k, v in pairs(rawJson.data.predict.detail) do
-            if k == 1 then
-                local subMenu = {}
-                -- for _, _v in pairs(rawJson.data.passedchart) do
-                --     local _titleStr = string.format("%s 🌡️%s 💧%s 💨%s 🌬%s", _v.time, _v.temperature, _v.rain1h, _v.humidity, _v.windSpeed)
-                --     local _item = { title = _titleStr }
-                --     table.insert(subMenu, _item)
-                -- end
-                os.execute("cd /Users/zhonghao/Projects/weather_landscape && /Users/zhonghao/miniconda3/envs/zhonghao/bin/python run_test.py")
-                local weatherImage = hs.image.imageFromPath("/Users/zhonghao/Projects/weather_landscape/tmp/test_03B3D811B884.bmp")
-                weatherImage:size({ w = 350, h = 150})
-
-                table.insert(menuData, {title = "", image = weatherImage})
-                table.insert(menuData, { title = '-' })
-                -- firstLine['menu'] = subMenu
-            else
-                titleStr = string.format("%s %s 🌞🌡️%s %s %s —— 🌜🌡️%s %s %s", getWeaEmoji(v.day.weather.info),v.date, v.day.weather.temperature, v.day.wind.power, v.day.weather.info,v.night.weather.temperature, v.night.wind.power, v.night.weather.info)
-                local item = { title = titleStr }
-                table.insert(menuData, item)
-            end
-        end
         WeatherMenubar:setMenu(menuData)
+
+        hs.http.doAsyncRequest(string.format(detailWeatherUrl, cityId, tostring(os.time())), "GET", nil, nil,
+            function(detailCode, detailBody, detailHeaders)
+                if currentRequestId ~= weatherRequestId then
+                    return
+                end
+                if detailCode ~= 200 then
+                    print('get weather error:' .. detailCode .. 'url: ' .. detailWeatherUrl)
+                    return
+                end
+
+                local detailJson = safeJsonDecode(detailBody)
+                if not detailJson or not detailJson.data or not detailJson.data.predict or not detailJson.data.predict.detail then
+                    print('get weather decode error: detail weather payload invalid')
+                    return
+                end
+
+                local nextMenu = hs.fnutils.copy(menuData)
+                local detailMenu = buildDetailMenu(detailJson)
+                for _, item in ipairs(detailMenu) do
+                    table.insert(nextMenu, item)
+                end
+                renderWeatherMenu(currentRequestId, nextMenu)
+                buildWeatherImageAsync(currentRequestId, nextMenu)
+            end)
     end)
 end
 
