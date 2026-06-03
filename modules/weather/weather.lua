@@ -199,7 +199,7 @@ local function maybeNotifyUpcomingAbnormalWeather()
         return
     end
 
-    local whenText = forecast.dt_txt or os.date("%Y-%m-%d %H:%M", forecast.dt)
+    local whenText = os.date("%Y-%m-%d %H:%M", forecast.dt)
     local description = localizeWeatherDescription(weatherItem)
     local popText = ""
     if forecast.pop then
