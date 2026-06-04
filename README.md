@@ -36,6 +36,7 @@
 [weather](./modules/weather/weather.lua): 天气组件
 - 使用 [中国气象台](http://www.nmc.cn) 接口获取实时天气和详细预报
 - 通过 Python 脚本处理 OpenWeatherMap 预报数据，生成天气景观图
+- 天气图片生成依赖 [weather_landscape](https://github.com/lds133/weather_landscape) 项目
 - 异常天气提醒（雷暴、雾、霾、沙尘等）
 - 使用时需修改 CityID 和 forecastJsonPath 等路径配置
 
