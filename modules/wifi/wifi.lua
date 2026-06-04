@@ -15,10 +15,13 @@ local function SwitchClashConfig(configName)
     end)
 end
 
-local function ssidChangedCallback()      -- 回调
-    local ssid = hs.wifi.currentNetwork() -- 获取当前 WiFi ssid
+local lastSSID = nil
+local pendingCheckTimer = nil
+
+local function checkAndSwitch(ssid)
     print("Wi-Fi SSID 变更: " .. (ssid or "nil"))
-    if (ssid ~= nil) then
+    if (ssid ~= nil and ssid ~= lastSSID) then
+        lastSSID = ssid
         if (ssid == "TelkingNet_PC") then
             print("检测到公司网络，切换 Clash 至 soclash")
             SwitchClashConfig("soclash")
@@ -26,6 +29,27 @@ local function ssidChangedCallback()      -- 回调
             print("检测到家里网络，切换 Clash 至 PaofuCloud")
             SwitchClashConfig("PaofuCloud")
         end
+    end
+end
+
+local function ssidChangedCallback()      -- 回调
+    local ssid = hs.wifi.currentNetwork() -- 获取当前 WiFi ssid
+
+    -- 取消上一次的延迟检查
+    if (pendingCheckTimer ~= nil) then
+        pendingCheckTimer:stop()
+        pendingCheckTimer = nil
+    end
+
+    if (ssid == nil) then
+        -- 断网过渡阶段，等 2 秒后重新检查
+        print("Wi-Fi 断开，2 秒后重试")
+        pendingCheckTimer = hs.timer.doAfter(2, function()
+            pendingCheckTimer = nil
+            checkAndSwitch(hs.wifi.currentNetwork())
+        end)
+    else
+        checkAndSwitch(ssid)
     end
 end
 
