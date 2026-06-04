@@ -61,8 +61,8 @@
 - 窗口焦点到下个屏幕 ⌃ + ⌥ + →
 - 移动光标到下个屏幕 ⌘ + `
 
-[wifi](./modules/wifi/wifi.lua): Wi-Fi 网络位置自动切换
-- 根据当前连接的 Wi-Fi SSID 自动切换 macOS 网络位置（公司/家里/自动）
+[wifi](./modules/wifi/wifi.lua): Wi-Fi 配置自动切换
+- 根据当前连接的 Wi-Fi SSID 自动切换 Clash 配置（公司：soclash / 家里：PaofuCloud）
 - 开关 Wi-Fi
 
 [input_method](./modules/input_method/input_method.lua): 输入法提示
