@@ -10,6 +10,7 @@ local weatherScriptArgs = { 'run_test.py' }
 local forecastJsonPath = '/Users/zhonghao/Projects/weather_landscape/tmp/openweathermap_fcst_03B3D811B884.json'
 local darkWeatherImagePath = '/Users/zhonghao/Projects/weather_landscape/tmp/landscape_rgb_b.png'
 local lightWeatherImagePath = '/Users/zhonghao/Projects/weather_landscape/tmp/landscape_rgb_w.png'
+local weatherImageTargetWidth = 400
 local weatherAlertCooldownSeconds = 3 * 60 * 60
 local weatherAlertWindowSeconds = 3 * 60 * 60
 local weatherAlertSettingsKey = "weather.lastAbnormalAlertAt"
@@ -218,7 +219,15 @@ local function setWeatherImage(menu)
     if not weatherImage then
         return false
     end
-    weatherImage:size({ w = 350, h = 150 })
+
+    local imageSize = weatherImage:size()
+    if imageSize and imageSize.w and imageSize.h and imageSize.w > 0 then
+        local scaledHeight = math.floor(weatherImageTargetWidth * imageSize.h / imageSize.w + 0.5)
+        weatherImage:size({ w = weatherImageTargetWidth, h = scaledHeight })
+    else
+        weatherImage:size({ w = weatherImageTargetWidth, h = 311 })
+    end
+
     table.insert(menu, 2, { title = "", image = weatherImage })
     table.insert(menu, 3, { title = '-' })
     return true
