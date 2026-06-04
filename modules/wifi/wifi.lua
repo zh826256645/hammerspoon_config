@@ -15,14 +15,27 @@ local function SwitchClashConfig(configName)
     end)
 end
 
+-- 通过 airport 命令获取当前 SSID（备选方案）
+local function getSSIDViaShell()
+    local handle = io.popen("/System/Library/PrivateFrameworks/Apple80211.framework/Versions/Current/Resources/airport -I 2>/dev/null | awk '/ SSID:/ {print $2}'")
+    if handle then
+        local result = handle:read("*a")
+        handle:close()
+        result = result:gsub("%s+$", "")
+        if result ~= "" then
+            return result
+        end
+    end
+    return nil
+end
+
 local lastSSID = nil
 local pendingCheckTimer = nil
 local retryCount = 0
-local maxRetries = 3
-local retryDelay = 5
+local maxRetries = 4
+local retryDelay = 3
 
-local function checkAndSwitch(ssid)
-    print("Wi-Fi SSID 变更: " .. (ssid or "nil"))
+local function trySwitch(ssid)
     if (ssid ~= nil and ssid ~= lastSSID) then
         lastSSID = ssid
         retryCount = 0
@@ -32,30 +45,44 @@ local function checkAndSwitch(ssid)
         elseif (ssid == "zhhh_5G") then
             print("检测到家里网络，切换 Clash 至 PaofuCloud")
             SwitchClashConfig("PaofuCloud")
+        else
+            print("未匹配的 SSID: " .. ssid)
         end
     end
 end
 
-local function scheduleRetry()
+local function getCurrentSSID(interface)
+    -- 先尝试 Hammerspoon API
+    local ssid = hs.wifi.currentNetwork(interface)
+    if (ssid ~= nil) then
+        return ssid
+    end
+    -- 备选：airport 命令
+    return getSSIDViaShell()
+end
+
+local function scheduleRetry(interface)
     if (retryCount >= maxRetries) then
         print("Wi-Fi 重试耗尽，放弃检查")
         retryCount = 0
         return
     end
     retryCount = retryCount + 1
-    print(string.format("Wi-Fi 尚未连接，%d 秒后第 %d 次重试", retryDelay, retryCount))
+    print(string.format("Wi-Fi 尚未连接，%d 秒后第 %d/%d 次重试", retryDelay, retryCount, maxRetries))
     pendingCheckTimer = hs.timer.doAfter(retryDelay, function()
         pendingCheckTimer = nil
-        checkAndSwitch(hs.wifi.currentNetwork())
-        -- 如果仍然为 nil，继续重试
-        if (hs.wifi.currentNetwork() == nil) then
-            scheduleRetry()
+        local ssid = getCurrentSSID(interface)
+        print("Wi-Fi SSID 变更: " .. (ssid or "nil"))
+        if (ssid ~= nil) then
+            trySwitch(ssid)
+        else
+            scheduleRetry(interface)
         end
     end)
 end
 
-local function ssidChangedCallback()      -- 回调
-    local ssid = hs.wifi.currentNetwork() -- 获取当前 WiFi ssid
+local function ssidChangedCallback(_, message, interface)
+    print("Wi-Fi 事件: " .. message .. " (接口: " .. (interface or "nil") .. ")")
 
     -- 取消上一次的延迟检查和重试
     if (pendingCheckTimer ~= nil) then
@@ -63,12 +90,14 @@ local function ssidChangedCallback()      -- 回调
         pendingCheckTimer = nil
     end
 
+    local ssid = getCurrentSSID(interface)
+    print("Wi-Fi SSID 变更: " .. (ssid or "nil"))
+
     if (ssid == nil) then
         retryCount = 0
-        print("Wi-Fi 断开，" .. retryDelay .. " 秒后重试")
-        scheduleRetry()
+        scheduleRetry(interface)
     else
-        checkAndSwitch(ssid)
+        trySwitch(ssid)
     end
 end
 
