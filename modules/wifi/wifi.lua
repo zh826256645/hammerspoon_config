@@ -17,11 +17,15 @@ end
 
 local lastSSID = nil
 local pendingCheckTimer = nil
+local retryCount = 0
+local maxRetries = 3
+local retryDelay = 5
 
 local function checkAndSwitch(ssid)
     print("Wi-Fi SSID 变更: " .. (ssid or "nil"))
     if (ssid ~= nil and ssid ~= lastSSID) then
         lastSSID = ssid
+        retryCount = 0
         if (ssid == "TelkingNet_PC") then
             print("检测到公司网络，切换 Clash 至 soclash")
             SwitchClashConfig("soclash")
@@ -32,22 +36,37 @@ local function checkAndSwitch(ssid)
     end
 end
 
+local function scheduleRetry()
+    if (retryCount >= maxRetries) then
+        print("Wi-Fi 重试耗尽，放弃检查")
+        retryCount = 0
+        return
+    end
+    retryCount = retryCount + 1
+    print(string.format("Wi-Fi 尚未连接，%d 秒后第 %d 次重试", retryDelay, retryCount))
+    pendingCheckTimer = hs.timer.doAfter(retryDelay, function()
+        pendingCheckTimer = nil
+        checkAndSwitch(hs.wifi.currentNetwork())
+        -- 如果仍然为 nil，继续重试
+        if (hs.wifi.currentNetwork() == nil) then
+            scheduleRetry()
+        end
+    end)
+end
+
 local function ssidChangedCallback()      -- 回调
     local ssid = hs.wifi.currentNetwork() -- 获取当前 WiFi ssid
 
-    -- 取消上一次的延迟检查
+    -- 取消上一次的延迟检查和重试
     if (pendingCheckTimer ~= nil) then
         pendingCheckTimer:stop()
         pendingCheckTimer = nil
     end
 
     if (ssid == nil) then
-        -- 断网过渡阶段，等 2 秒后重新检查
-        print("Wi-Fi 断开，2 秒后重试")
-        pendingCheckTimer = hs.timer.doAfter(2, function()
-            pendingCheckTimer = nil
-            checkAndSwitch(hs.wifi.currentNetwork())
-        end)
+        retryCount = 0
+        print("Wi-Fi 断开，" .. retryDelay .. " 秒后重试")
+        scheduleRetry()
     else
         checkAndSwitch(ssid)
     end
