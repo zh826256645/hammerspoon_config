@@ -1,40 +1,43 @@
-# My hammerspoon cofing
+# My hammerspoon config
 
 **Based on [hammerspoon-config](https://github.com/wangshub/hammerspoon-config)**
 
 ## Modules
 
 [application](./modules/application/application.lua): 控制应用程序
-- 关闭应用程序
-- 绑定 Finder 快捷键到 ⌘ + e
-- 绑定 Iterm2 快捷键到 ⌃ + ⌥ + t
-- 绑定 QQ 快捷键到 ⌃ + ⌘ + z
-- 绑定 Chrome 快捷键到 ⌃ + ⌘ + g
-- 绑定 VS Code 快捷键到 ⌃ + ⌘ + v
-- 绑定 Notion 快捷键到 ⌃ + ⌘ + n
-- 绑定 Netease 快捷键到 ⌃ + ⌘ + w
-- 绑定 Reeder 快捷键到 ⌃ + ⌘ + r
+- 绑定 Finder 快捷键到 ⌘ + E
+- 绑定 Alacritty 快捷键到 ⌃ + ⌥ + T
+- 绑定 Chrome（Edge）快捷键到 ⌃ + ⌘ + G
+- 绑定 VS Code 快捷键到 ⌃ + ⌘ + V
+- 绑定 Launchpad 快捷键到 ⌃ + ⌘ + L
+- 绑定 Notion 快捷键到 ⌃ + ⌘ + N
+- 绑定 Reeder 快捷键到 ⌃ + ⌘ + R
+- 绑定 Podcasts 快捷键到 ⌃ + ⌘ + P
+- 绑定 Codex 快捷键到 ⌃ + ⌘ + Z
 
 [blueutils](./modules/bluetooth/blueutils.lua): 控制蓝牙
-- 链接/关闭蓝牙
-- 屏幕休眠后断开蓝牙连接以及微信
-- 屏幕唤醒后打开蓝牙
+- 连接/断开指定蓝牙设备（JBL、Sony 耳机、Keychron 键盘）
+- 开关蓝牙
+- 屏幕休眠后断开蓝牙设备
 
-[helps](./modules/help/helps.lua): 帮助菜单
+[helps](./modules/help/helps.lua): 帮助菜单（默认已注释，按需启用）
 
 [history](./modules/pasteboard/history.lua): 粘贴板历史记录
+- ⌘ + ⇧ + V 弹出粘贴板历史菜单
 
 [pasteboard](./modules/pasteboard/pasteboard.lua): 粘贴板数据处理
 - 去除复制的字符串左右两边的空格
 
-[monitor](./modules/monitor/monitor.lua): 监控系统的状态，在不同的状态下进行不同的处理
-- 屏幕关闭后，关闭微信应用
-- 屏幕关闭后，断开蓝牙设置连接
-- 解锁后打开微信
+[monitor](./modules/monitor/monitor.lua): 监控系统状态，在不同状态下进行不同处理
+- 屏幕休眠 15 秒后：关闭微信、断开蓝牙设备、关闭蓝牙与 Wi-Fi
+- 屏幕唤醒 5 秒后：预打开蓝牙与 Wi-Fi
+- 解锁后：立即打开蓝牙与 Wi-Fi，打开 ScrollReverser
 
 [weather](./modules/weather/weather.lua): 天气组件
-- 使用了 [中国气象台](http://www.nmc.cn) 和 [天气 API](https://www.tianqiapi.com) 的接口获取天气
-- 使用时，需要手动修改 CityID 和链接中的城市拼音
+- 使用 [中国气象台](http://www.nmc.cn) 接口获取实时天气和详细预报
+- 通过 Python 脚本处理 OpenWeatherMap 预报数据，生成天气景观图
+- 异常天气提醒（雷暴、雾、霾、沙尘等）
+- 使用时需修改 CityID 和 forecastJsonPath 等路径配置
 
 [windows](./modules/windows/windows.lua): 绑定窗口控制的快捷键
 - 左吸附 ^ + ⌥ + ⌘ + ←
@@ -47,13 +50,27 @@
 - 左下角吸附 ^ + ⌥ + ⇧ + ↓
 - 到上个屏幕 ⌥ + ⇧ + ←
 - 到下个屏幕 ⌥ + ⇧ + →
+- 移动窗口到屏幕 1/2/3 ⌥ + ⇧ + 1/2/3
 - 最大化 ^ + ⌥ + ⌘ + M
 - 全屏幕 ^ + ⌥ + ⌘ + F
 - 屏幕居中 ^ + ⌥ + ⌘ + C
+- 切换应用窗口 ⌥ + ⇧ + H
+- 窗口提示（hints）⌥ + ⇧ + /
+- 窗口焦点到上个屏幕 ⌃ + ⌥ + ←
+- 窗口焦点到下个屏幕 ⌃ + ⌥ + →
+- 移动光标到下个屏幕 ⌘ + `
 
-[hotkey](./modules/shortcuts/hotkey.lua): 定义快捷键
+[wifi](./modules/wifi/wifi.lua): Wi-Fi 网络位置自动切换
+- 根据当前连接的 Wi-Fi SSID 自动切换 macOS 网络位置（公司/家里/自动）
+- 开关 Wi-Fi
 
-[utils](./modules/utils.lua): 工具函数
+[input_method](./modules/input_method/input_method.lua): 输入法提示
+- 切换输入法时显示当前输入法名称（ABC / 中文 / 鼠须管 / 微信输入法）
+
+[hotkey](./modules/shortcuts/hotkey.lua): 定义快捷键组合
+
+[utils](./modules/utils/utils.lua): 工具函数（日期格式化、打印 Table、Sleep）
+[stringUtils](./modules/utils/stringUtils.lua): 字符串工具（split、strip、lstrip、rstrip）
 
 ## Use
 
