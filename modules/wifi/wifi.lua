@@ -2,6 +2,10 @@ local companyUid = "154631B1-2A0A-4785-8EE3-EAF8D5445C68"
 local homeUid = "F48B18E2-97D1-4ABB-9488-640135C2EF17"
 local defaultUid = "A647F211-7CB7-4EE6-B13F-8DE36A8135AF"
 
+-- Clash 配置
+local clashConfigDir = os.getenv("HOME") .. "/.config/clash"
+local clashApiUrl = "http://127.0.0.1:9090/configs"
+
 local function currentScselectUid()
     local cmd = "scselect current set"
     local succeeded, result = hs.osascript.applescript(string.format('do shell script "%s"', cmd))
@@ -19,6 +23,19 @@ local function currentScselectUid()
     end
 end
 
+-- 切换 Clash 配置
+local function SwitchClashConfig(configName)
+    local configPath = clashConfigDir .. "/" .. configName .. ".yaml"
+    hs.http.doAsyncRequest(clashApiUrl, "PUT", '{"path":"' .. configPath .. '"}', nil, function(code, body, headers)
+        if code == 204 then
+            print("Clash 配置已切换: " .. configName)
+            hs.notify.new({ title = "Clash", informativeText = "配置已切换至 " .. configName }):send()
+        else
+            print("Clash 配置切换失败: " .. (code or "无响应"))
+        end
+    end)
+end
+
 local function ssidChangedCallback()      -- 回调
     local ssid = hs.wifi.currentNetwork() -- 获取当前 WiFi ssid
     if (ssid ~= nil) then
@@ -29,11 +46,13 @@ local function ssidChangedCallback()      -- 回调
                 uid = companyUid
                 hs.notify.new({ title = "位置", informativeText = "位置切换到公司" }):send()
             end
+            SwitchClashConfig("soclash")
         elseif (ssid == "zhhh_5G") then
             if (currentUid ~= homeUid) then
                 uid = homeUid
                 hs.notify.new({ title = "位置", informativeText = "位置切换到家里" }):send()
             end
+            SwitchClashConfig("PaofuCloud")
         elseif (currentUid ~= defaultUid) then
             uid = defaultUid
             hs.notify.new({ title = "位置", informativeText = "位置切换到自动" }):send()
