@@ -20,13 +20,13 @@ local function closeAfter(sec)
 
     pendingCloseTimer = stopTimer(pendingCloseTimer)
 
-    print(sec .. " 秒后如果屏幕依然未解锁，将关闭 " .. name .. " 与断开蓝牙耳机")
+    print(sec .. " 秒后如果仍未解锁，将关闭 " .. name .. "、断开蓝牙设备并关闭蓝牙与 Wi-Fi")
 
     pendingCloseTimer = hs.timer.doAfter(sec, function()
         pendingCloseTimer = nil
 
         if (eventId ~= monitorEventId) then
-            print("跳过过期的关闭任务")
+            print("跳过过期的睡眠关闭任务")
             return
         end
 
@@ -39,7 +39,7 @@ local function closeAfter(sec)
             BluetoothSwitch(0)
             WifiSwitch(0)
         else
-            print("取消关闭 " .. name .. " 与 蓝牙")
+            print("取消睡眠关闭任务")
         end
     end
     )
@@ -51,13 +51,13 @@ local function openAfter(sec)
 
     pendingOpenTimer = stopTimer(pendingOpenTimer)
 
-    print(sec .. " 秒后如果屏幕未休眠，将打开蓝牙")
+    print(sec .. " 秒后如果未再次休眠，将预打开蓝牙与 Wi-Fi")
 
     pendingOpenTimer = hs.timer.doAfter(sec, function()
         pendingOpenTimer = nil
 
         if (eventId ~= monitorEventId) then
-            print("跳过过期的打开任务")
+            print("跳过过期的唤醒预打开任务")
             return
         end
 
@@ -65,7 +65,7 @@ local function openAfter(sec)
             BluetoothSwitch(1)
             WifiSwitch(1)
         else
-            print("取消打开蓝牙与 Wi-Fi")
+            print("取消唤醒预打开任务")
         end
     end
     )
@@ -90,9 +90,13 @@ local function caffeinateCallback(eventType)
     elseif (eventType == hs.caffeinate.watcher.screensDidUnlock) then
         print("解锁")
         pendingCloseTimer = stopTimer(pendingCloseTimer)
+        pendingOpenTimer = stopTimer(pendingOpenTimer)
         -- blueUtils:connectBluetooth(MyBlueDeviceID) --
         -- bluetoothSwitch(1)
         -- GetWeather()
+        print("解锁后立即打开蓝牙与 Wi-Fi")
+        BluetoothSwitch(1)
+        WifiSwitch(1)
         OpenApplication(TheScrollReverserID)
     end
 end
