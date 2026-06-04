@@ -17,10 +17,13 @@ end
 
 local function ssidChangedCallback()      -- 回调
     local ssid = hs.wifi.currentNetwork() -- 获取当前 WiFi ssid
+    print("Wi-Fi SSID 变更: " .. (ssid or "nil"))
     if (ssid ~= nil) then
         if (ssid == "TelkingNet_PC") then
+            print("检测到公司网络，切换 Clash 至 soclash")
             SwitchClashConfig("soclash")
         elseif (ssid == "zhhh_5G") then
+            print("检测到家里网络，切换 Clash 至 PaofuCloud")
             SwitchClashConfig("PaofuCloud")
         end
     end
