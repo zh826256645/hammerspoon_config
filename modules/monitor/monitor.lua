@@ -15,13 +15,11 @@ end
 
 -- 多少秒后关闭程序
 local function closeAfter(sec)
-    -- 关闭微信
-    local name = string.split(TheWeChatBundleID, '.')[3]
     local eventId = monitorEventId
 
     pendingCloseTimer = stopTimer(pendingCloseTimer)
 
-    print(sec .. " 秒后如果仍未解锁，将关闭 " .. name .. "、企业微信、音流，断开蓝牙设备并关闭蓝牙与 Wi-Fi")
+    print(sec .. " 秒后如果仍未解锁，将关闭 微信、企业微信、音流，断开蓝牙设备并关闭蓝牙与 Wi-Fi")
 
     pendingCloseTimer = hs.timer.doAfter(sec, function()
         pendingCloseTimer = nil

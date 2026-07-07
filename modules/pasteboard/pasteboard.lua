@@ -7,7 +7,7 @@ local function pasteboardCallback(value)
         hs.pasteboard.setContents(value)
 
         if (value ~= LastStr) then
-            hs.alert.show("复制", 0.8)
+            hs.alert.show("复制", nil, hs.mouse.getCurrentScreen(), 0.8)
             LastStr = value
         end
     end
