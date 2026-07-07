@@ -1,61 +1,248 @@
 -- Clash 配置
-local clashConfigDir = os.getenv("HOME") .. "/.config/clash"
+local homeDir = os.getenv("HOME")
 local clashApiUrl = "http://127.0.0.1:9090/configs"
+local sparkleProfileStatePath = homeDir .. "/Library/Application Support/sparkle/profile.yaml"
+local sparkleProfileDisplayNames = {
+    socloud = "socloud",
+    paofuCloud = "paofu",
+}
+local homeWifiVolume = 20
+local configSwitchCooldownSeconds = 10
+local lastConfigActionName = nil
+local lastConfigActionAt = 0
+local profileSourceOverrides = {
+    socloud = homeDir .. "/Library/Application Support/sparkle/profiles/19d8465b411.yaml",
+    paofuCloud = homeDir .. "/Library/Application Support/sparkle/profiles/19dc250e855.yaml",
+}
+local runtimeConfigDirCandidates = {
+    homeDir .. "/Library/Application Support/sparkle/work",
+    homeDir .. "/.config/mihomo",
+    homeDir .. "/.config/clash.meta",
+    homeDir .. "/.config/clash",
+}
+local sourceConfigDirCandidates = {
+    homeDir .. "/.config/clash",
+    homeDir .. "/.config/clash.meta",
+    homeDir .. "/.config/mihomo",
+    homeDir .. "/Library/Application Support/sparkle/work",
+}
+
+local function pathExists(path, expectedMode)
+    local attributes = hs.fs.attributes(path)
+    return attributes ~= nil and (expectedMode == nil or attributes.mode == expectedMode)
+end
+
+local function findRuntimeConfigDir()
+    for _, dir in ipairs(runtimeConfigDirCandidates) do
+        if pathExists(dir, "directory") then
+            return dir
+        end
+    end
+
+    return nil
+end
+
+local function findSourceConfigPath(configName)
+    local overridePath = profileSourceOverrides[configName]
+    if overridePath ~= nil and pathExists(overridePath, "file") then
+        return overridePath, overridePath:match("([^/]+)$")
+    end
+
+    local fileNames = {
+        configName .. ".yaml",
+        configName .. ".yml",
+    }
+
+    for _, dir in ipairs(sourceConfigDirCandidates) do
+        if pathExists(dir, "directory") then
+            for _, fileName in ipairs(fileNames) do
+                local configPath = dir .. "/" .. fileName
+                if pathExists(configPath, "file") then
+                    return configPath, fileName
+                end
+            end
+        end
+    end
+
+    return nil, nil
+end
+
+local function readFile(path)
+    local file = io.open(path, "rb")
+    if file == nil then
+        return nil
+    end
+
+    local content = file:read("*a")
+    file:close()
+    return content
+end
+
+local function writeFile(path, content)
+    local file = io.open(path, "wb")
+    if file == nil then
+        return false
+    end
+
+    file:write(content)
+    file:close()
+    return true
+end
+
+local function getBuiltInOutputDevice(actionName)
+    local outputDevice = hs.audiodevice.defaultOutputDevice()
+    if outputDevice == nil then
+        print(actionName .. "失败: 未找到默认输出设备")
+        return nil
+    end
+
+    local transportType = outputDevice:transportType()
+    if transportType ~= "Built-in" then
+        print("跳过" .. actionName .. ": 当前输出设备不是系统自动扬声器 (" .. tostring(outputDevice:name()) .. ")")
+        return nil
+    end
+
+    return outputDevice
+end
+
+local function MuteSystemAudio()
+    local outputDevice = getBuiltInOutputDevice("静音")
+    if outputDevice == nil then
+        return nil
+    end
+
+    if outputDevice:muted() then
+        print("跳过静音: 系统声音已静音")
+        return nil
+    end
+
+    local volume = outputDevice:volume()
+    if volume ~= nil and volume <= 0 then
+        print("跳过静音: 系统音量已为 0")
+        return nil
+    end
+
+    outputDevice:setMuted(true)
+    print("检测到公司 Wi-Fi，已将系统声音静音")
+    return "顺手把声音也关掉了"
+end
+
+local function RestoreHomeWifiAudio()
+    local outputDevice = getBuiltInOutputDevice("恢复音量")
+    if outputDevice == nil then
+        return nil
+    end
+
+    if not outputDevice:muted() then
+        print("跳过恢复音量: 系统声音当前不是静音")
+        return nil
+    end
+
+    outputDevice:setMuted(false)
+    outputDevice:setVolume(homeWifiVolume)
+    print("检测到家里 Wi-Fi，已将系统声音打开并设置到 " .. homeWifiVolume .. "%")
+    return "到家了，顺手把声音开到 " .. homeWifiVolume .. "%"
+end
+
+local function shouldSkipDuplicateConfigAction(configName)
+    local now = hs.timer.secondsSinceEpoch()
+
+    if lastConfigActionName == configName and (now - lastConfigActionAt) < configSwitchCooldownSeconds then
+        return true
+    end
+
+    lastConfigActionName = configName
+    lastConfigActionAt = now
+    return false
+end
+
+local function prepareRuntimeConfig(configName)
+    local runtimeConfigDir = findRuntimeConfigDir()
+    if runtimeConfigDir == nil then
+        return nil, "未找到可用的 mihomo 运行目录"
+    end
+
+    local sourceConfigPath, fileName = findSourceConfigPath(configName)
+    if sourceConfigPath == nil then
+        return nil, "未找到配置文件 " .. configName
+    end
+
+    local targetConfigPath = runtimeConfigDir .. "/" .. fileName
+    if sourceConfigPath == targetConfigPath then
+        return targetConfigPath, nil
+    end
+
+    local content = readFile(sourceConfigPath)
+    if content == nil then
+        return nil, "读取配置文件失败: " .. sourceConfigPath
+    end
+
+    if not writeFile(targetConfigPath, content) then
+        return nil, "写入运行目录失败: " .. targetConfigPath
+    end
+
+    return targetConfigPath, nil
+end
 
 -- 切换 Clash 配置
-local function SwitchClashConfig(configName)
-    local configPath = clashConfigDir .. "/" .. configName .. ".yaml"
-    hs.http.doAsyncRequest(clashApiUrl, "PUT", '{"path":"' .. configPath .. '"}', nil, function(code, body, headers)
+local function SwitchClashConfig(configName, extraMessage)
+    if shouldSkipDuplicateConfigAction(configName) then
+        print("跳过重复的 Clash 配置切换: " .. configName)
+        return
+    end
+
+    if pathExists(sparkleProfileStatePath, "file") then
+        local displayName = sparkleProfileDisplayNames[configName] or configName
+        local message = "请在 Sparkle 中切换到 " .. displayName
+        if extraMessage ~= nil then
+            message = extraMessage .. "，" .. message
+        end
+        print("Clash 配置切换提醒: " .. message)
+        hs.notify.new({ title = "Sparkle", informativeText = message }):send()
+        return
+    end
+
+    local configPath, errorMessage = prepareRuntimeConfig(configName)
+    if configPath == nil then
+        print("Clash 配置切换失败: " .. errorMessage)
+        hs.notify.new({ title = "Clash", informativeText = errorMessage }):send()
+        return
+    end
+
+    local headers = { ["Content-Type"] = "application/json" }
+    local payload = hs.json.encode({ path = configPath })
+    hs.http.doAsyncRequest(clashApiUrl, "PUT", payload, headers, function(code, body, headers)
         if code == 204 then
             print("Clash 配置已切换: " .. configName)
-            hs.notify.new({ title = "Clash", informativeText = "配置已切换至 " .. configName }):send()
+            local message = "配置已切换至 " .. configName
+            if extraMessage ~= nil then
+                message = extraMessage .. "，" .. message
+            end
+            hs.notify.new({ title = "Clash", informativeText = message }):send()
         else
-            print("Clash 配置切换失败: " .. (code or "无响应"))
+            local detail = body and body ~= "" and (" - " .. body) or ""
+            print("Clash 配置切换失败: " .. (code or "无响应") .. detail)
         end
     end)
 end
 
--- 获取当前 SSID：优先 Hammerspoon API，失败则用 airport 命令
-local function getCurrentSSID()
-    local ssid = hs.wifi.currentNetwork()
+local function ssidChangedCallback()      -- 回调
+    local ssid = hs.wifi.currentNetwork() -- 获取当前 WiFi ssid
     if (ssid ~= nil) then
-        return ssid
-    end
-    local handle = io.popen("/System/Library/PrivateFrameworks/Apple80211.framework/Versions/Current/Resources/airport -I 2>/dev/null | awk '/ SSID:/ {print $2}'")
-    if handle then
-        local result = handle:read("*a")
-        handle:close()
-        result = result:gsub("%s+$", "")
-        if result ~= "" then
-            return result
-        end
-    end
-    return nil
-end
-
-local lastSSID = nil
-local pollInterval = 5
-
-local function checkWiFi()
-    local ssid = getCurrentSSID()
-    if (ssid ~= lastSSID) then
-        lastSSID = ssid
-        print("Wi-Fi SSID 变更: " .. (ssid or "断开"))
         if (ssid == "TelkingNet_PC") then
-            print("检测到公司网络，切换 Clash 至 soclash")
-            SwitchClashConfig("soclash")
+            local extraMessage = MuteSystemAudio()
+            SwitchClashConfig("socloud", extraMessage)
         elseif (ssid == "zhhh_5G") then
-            print("检测到家里网络，切换 Clash 至 PaofuCloud")
-            SwitchClashConfig("PaofuCloud")
+            local extraMessage = RestoreHomeWifiAudio()
+            SwitchClashConfig("paofuCloud", extraMessage)
         end
     end
 end
 
--- 注册 Wi-Fi 监控（轮询方式）
+-- 注册 Wi-Fi 监控
 function RegisterWifiWatcher()
-    checkWiFi()
-    hs.timer.doEvery(pollInterval, checkWiFi)
-    return true
+    local wifiWatcher = hs.wifi.watcher.new(ssidChangedCallback)
+    return wifiWatcher
 end
 
 -- 开关 Wi-Fi

@@ -1,6 +1,7 @@
 -- 处理应用
 
 TheWeChatBundleID = "com.tencent.xinWeChat"
+TheWeWorkBundleID = "com.tencent.WeWorkMac"
 TheQQBundleID = "com.tencent.qq"
 TheFinderID = "com.apple.finder"
 TheIterm2ID = "com.googlecode.iterm2"
@@ -20,14 +21,15 @@ TheSpotifyID = "com.spotify.client"
 TheYouTubeMusicID = "com.google.Chrome.app.cinhimbnkkaeohfgghhklpknlkffjgod"
 ThePodcastsMusicID = "com.apple.podcasts"
 TheCodexID = "com.openai.codex"
+TheYinLiuBundleID = "cn.aqzscn.streamMusic"
 
 -- 关闭程序
-function CloseApplication(bundleID)
+function CloseApplication(bundleID, appName)
     local application = hs.application.applicationsForBundleID(bundleID)
     application = application[1]
 
     if application ~= nil and application:isRunning() then
-        local name = string.split(bundleID, '.')[3]
+        local name = appName or string.split(bundleID, '.')[3]
         print("关闭 " .. name .. " 程序")
         application:kill()
     end
@@ -72,6 +74,9 @@ function BindApplicationShortcut()
     for _, value in ipairs(settings) do
         hs.hotkey.bind(value[2], value[3], function()
             hs.application.open(value[4])
+            hs.timer.doAfter(0.3, function()
+                hs.alert.show(value[1], 0.8)
+            end)
         end)
     end
 end

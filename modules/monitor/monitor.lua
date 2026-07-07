@@ -3,6 +3,7 @@
 local pendingCloseTimer = nil
 local pendingOpenTimer = nil
 local monitorEventId = 0
+local nowStatus = nil
 
 local function stopTimer(timer)
     if timer ~= nil then
@@ -20,7 +21,7 @@ local function closeAfter(sec)
 
     pendingCloseTimer = stopTimer(pendingCloseTimer)
 
-    print(sec .. " 秒后如果仍未解锁，将关闭 " .. name .. "、断开蓝牙设备并关闭蓝牙与 Wi-Fi")
+    print(sec .. " 秒后如果仍未解锁，将关闭 " .. name .. "、企业微信、音流，断开蓝牙设备并关闭蓝牙与 Wi-Fi")
 
     pendingCloseTimer = hs.timer.doAfter(sec, function()
         pendingCloseTimer = nil
@@ -31,7 +32,9 @@ local function closeAfter(sec)
         end
 
         if (nowStatus ~= hs.caffeinate.watcher.screensDidUnlock) then
-            CloseApplication(TheWeChatBundleID)
+            CloseApplication(TheWeChatBundleID, "微信")
+            CloseApplication(TheWeWorkBundleID, "企业微信")
+            CloseApplication(TheYinLiuBundleID, "音流")
             CloseMyBluetooth()
 
             Sleep(2)
@@ -73,21 +76,26 @@ end
 
 -- 根据系统状态进行不同的处理
 local function caffeinateCallback(eventType)
-    monitorEventId = monitorEventId + 1
-    nowStatus = eventType
-
     if (eventType == hs.caffeinate.watcher.screensDidSleep) then
+        monitorEventId = monitorEventId + 1
+        nowStatus = eventType
         print("睡眠")
         pendingOpenTimer = stopTimer(pendingOpenTimer)
         closeAfter(15)
     elseif (eventType == hs.caffeinate.watcher.screensDidWake) then
+        monitorEventId = monitorEventId + 1
+        nowStatus = eventType
         print("唤醒")
         openAfter(5)
     elseif (eventType == hs.caffeinate.watcher.screensDidLock) then
+        monitorEventId = monitorEventId + 1
+        nowStatus = eventType
         print("锁屏")
         -- blueUtils:disconnectBluetooth(MyBlueDeviceID) --
         -- bluetoothSwitchAfter(10, 0)
     elseif (eventType == hs.caffeinate.watcher.screensDidUnlock) then
+        monitorEventId = monitorEventId + 1
+        nowStatus = eventType
         print("解锁")
         pendingCloseTimer = stopTimer(pendingCloseTimer)
         pendingOpenTimer = stopTimer(pendingOpenTimer)
@@ -98,6 +106,8 @@ local function caffeinateCallback(eventType)
         BluetoothSwitch(1)
         WifiSwitch(1)
         OpenApplication(TheScrollReverserID)
+    else
+        print("忽略未处理的 caffeinate 事件: " .. tostring(eventType))
     end
 end
 
