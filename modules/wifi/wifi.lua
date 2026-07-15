@@ -6,7 +6,7 @@ local sparkleProfileDisplayNames = {
     socloud = "socloud",
     paofuCloud = "paofu",
 }
-local homeWifiVolume = 20
+local homeWifiVolume = 43
 local configSwitchCooldownSeconds = 10
 local lastConfigActionName = nil
 local lastConfigActionAt = 0

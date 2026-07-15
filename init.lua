@@ -3,6 +3,7 @@
 require "modules/utils/stringUtils"
 require "modules/utils/utils"
 require "modules/shortcuts/hotkey"
+require "modules/computer_mode/computer_mode"
 require "modules/window/windows"
 require "modules/weather/weather"
 require "modules/bluetooth/blueutils"
@@ -28,8 +29,11 @@ BindWindowFocusSwitch()
 WeatherComponent = RegisterWeatherComponent()
 WeatherComponent:start()
 
+-- 注册电脑模式
+ComputerMode = RegisterComputerMode()
+
 -- 绑定软件快捷键
-BindApplicationShortcut()
+BindApplicationShortcut(ComputerMode)
 
 -- 注册监控
 Monitor = RegisterMonitor()

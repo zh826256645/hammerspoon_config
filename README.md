@@ -8,12 +8,17 @@
 - 绑定 Finder 快捷键到 ⌘ + E
 - 绑定 Alacritty 快捷键到 ⌃ + ⌥ + T
 - 绑定 Chrome（Edge）快捷键到 ⌃ + ⌘ + G
-- 绑定 VS Code 快捷键到 ⌃ + ⌘ + V
+- 工作模式下绑定 VS Code 快捷键到 ⌃ + ⌘ + V
 - 绑定 Launchpad 快捷键到 ⌃ + ⌘ + L
 - 绑定 Notion 快捷键到 ⌃ + ⌘ + N
 - 绑定 Reeder 快捷键到 ⌃ + ⌘ + R
 - 绑定 Podcasts 快捷键到 ⌃ + ⌘ + P
-- 绑定 Codex 快捷键到 ⌃ + ⌘ + Z
+- 工作模式下绑定 Codex 快捷键到 ⌃ + ⌘ + Z
+
+[computer_mode](./modules/computer_mode/computer_mode.lua): 管理电脑工作/娱乐模式
+- 使用 ⌃ + ⌥ + ⌘ + W 切换模式
+- 模式状态会在 Hammerspoon 重载后保留
+- 其他模块可通过 `onChange` 响应模式变化
 
 [blueutils](./modules/bluetooth/blueutils.lua): 控制蓝牙
 - 连接/断开指定蓝牙设备（JBL、Sony 耳机、Keychron 键盘）
@@ -29,7 +34,7 @@
 - 去除复制的字符串左右两边的空格
 
 [monitor](./modules/monitor/monitor.lua): 监控系统状态，在不同状态下进行不同处理
-- 屏幕休眠 15 秒后：关闭微信、企业微信、音流，断开蓝牙设备、关闭蓝牙与 Wi-Fi
+- 屏幕休眠 15 秒后：关闭微信、音流，娱乐模式下同时关闭企业微信；断开蓝牙设备、关闭蓝牙与 Wi-Fi
 - 屏幕唤醒 5 秒后：预打开蓝牙与 Wi-Fi
 - 解锁后：立即打开蓝牙与 Wi-Fi，打开 ScrollReverser
 

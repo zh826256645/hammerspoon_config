@@ -23,6 +23,18 @@ ThePodcastsMusicID = "com.apple.podcasts"
 TheCodexID = "com.openai.codex"
 TheYinLiuBundleID = "cn.aqzscn.streamMusic"
 
+local workModeHotkeys = {}
+
+local function SetWorkModeHotkeysEnabled(enabled)
+    for _, hotkey in ipairs(workModeHotkeys) do
+        if enabled then
+            hotkey:enable()
+        else
+            hotkey:disable()
+        end
+    end
+end
+
 -- 关闭程序
 function CloseApplication(bundleID, appName)
     local application = hs.application.applicationsForBundleID(bundleID)
@@ -52,7 +64,7 @@ end
 -- end
 
 -- 绑定程序
-function BindApplicationShortcut()
+function BindApplicationShortcut(computerMode)
     local settings = {
         { 'Finder',         CmdHyper,     'E', TheFinderID },
         -- {'Iterm2', CtrlAltHyper, 'T', TheIterm2ID},
@@ -60,7 +72,7 @@ function BindApplicationShortcut()
         -- { 'Warp',      CtrlAltHyper, 'T', TheWarpID },
         -- { 'Chrome',         CmdCtrlHyper, 'G', TheChromeID },
         { 'Chrome',         CmdCtrlHyper, 'G', TheEdgeID },
-        { 'VSCode',         CmdCtrlHyper, 'V', TheVSCodeID },
+        { 'VSCode',         CmdCtrlHyper, 'V', TheVSCodeID, true },
         { 'Launchpad',      CmdCtrlHyper, 'L', TheLaunchpadID },
         { 'Notion',         CmdCtrlHyper, 'N', TheNotionID },
         { 'Reeder',         CmdCtrlHyper, 'R', TheReederID },
@@ -69,14 +81,20 @@ function BindApplicationShortcut()
         -- { 'Spotify',        CmdCtrlHyper, 'S', TheSpotifyID },
         -- { 'YouTubeMusicID', CmdCtrlHyper, 'M', TheYouTubeMusicID },
         { 'PodcastsMusic', CmdCtrlHyper, 'P', ThePodcastsMusicID },
-        { 'Codex', CmdCtrlHyper, 'Z', TheCodexID },
+        { 'Codex', CmdCtrlHyper, 'Z', TheCodexID, true },
     }
     for _, value in ipairs(settings) do
-        hs.hotkey.bind(value[2], value[3], function()
+        local hotkey = hs.hotkey.bind(value[2], value[3], function()
             hs.application.open(value[4])
             hs.timer.doAfter(0.3, function()
                 hs.alert.show(value[1], 0.8)
             end)
         end)
+        if value[5] then
+            table.insert(workModeHotkeys, hotkey)
+        end
     end
+    computerMode:onChange(function()
+        SetWorkModeHotkeysEnabled(computerMode:isWorkMode())
+    end)
 end
