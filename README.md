@@ -18,6 +18,7 @@
 [computer_mode](./modules/computer_mode/computer_mode.lua): 管理电脑工作/娱乐模式
 - 使用 ⌃ + ⌥ + ⌘ + W 切换模式
 - 模式状态会在 Hammerspoon 重载后保留
+- 周一至周六 08:30–09:30 检查一次并切换到工作模式，18:10 后检查一次并切换到娱乐模式
 - 其他模块可通过 `onChange` 响应模式变化
 
 [blueutils](./modules/bluetooth/blueutils.lua): 控制蓝牙
