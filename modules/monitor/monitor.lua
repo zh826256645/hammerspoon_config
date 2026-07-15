@@ -19,7 +19,7 @@ local function closeAfter(sec)
 
     pendingCloseTimer = stopTimer(pendingCloseTimer)
 
-    print(sec .. " 秒后如果仍未解锁，将关闭 微信、音流（娱乐模式同时关闭企业微信），断开蓝牙设备并关闭蓝牙与 Wi-Fi")
+    print(sec .. " 秒后如果仍未解锁，将关闭 音流（娱乐模式同时关闭微信与企业微信），断开蓝牙设备并关闭蓝牙与 Wi-Fi")
 
     pendingCloseTimer = hs.timer.doAfter(sec, function()
         pendingCloseTimer = nil
@@ -30,8 +30,8 @@ local function closeAfter(sec)
         end
 
         if (nowStatus ~= hs.caffeinate.watcher.screensDidUnlock) then
-            CloseApplication(TheWeChatBundleID, "微信")
             if not ComputerMode:isWorkMode() then
+                CloseApplication(TheWeChatBundleID, "微信")
                 CloseApplication(TheWeWorkBundleID, "企业微信")
             end
             CloseApplication(TheYinLiuBundleID, "音流")
