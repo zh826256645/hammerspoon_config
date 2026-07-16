@@ -9,12 +9,12 @@ require "modules/shortcuts/hotkey"
 require "modules/computer_mode/computer_mode"
 require "modules/window/windows"
 require "modules/weather/weather"
-require "modules/bluetooth/blueutils"
+local BluetoothControl = require "modules/bluetooth/blueutils"
 require "modules/application/application"
 require "modules/monitor/monitor"
 require "modules/pasteboard/pasteboard"
 require "modules/pasteboard/history"
-require "modules/wifi/wifi"
+local WifiControl = require "modules/wifi/wifi"
 require "modules/input_method/input_method"
 require "modules/help/helps"
 
@@ -42,7 +42,7 @@ ComputerMode = RegisterComputerMode()
 BindApplicationShortcut(ComputerMode)
 
 -- 注册监控
-Monitor = RegisterMonitor()
+Monitor = RegisterMonitor(BluetoothControl, WifiControl)
 Monitor:start()
 
 -- 注册剪贴板监控
@@ -54,7 +54,7 @@ ClipboardHistory = RegisterClipboardHistory()
 ClipboardHistory:start()
 
 -- 注册 wifi 监控
-WifiWatcher = RegisterWifiWatcher()
+WifiWatcher = WifiControl.registerWatcher()
 if WifiWatcher ~= nil then
     WifiWatcher:start()
 end

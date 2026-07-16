@@ -1,5 +1,6 @@
 -- 处理蓝牙
 
+local Bluetooth = {}
 local bluetoothConfig = require("config").bluetooth
 local blueutilPath = bluetoothConfig and bluetoothConfig.blueutilPath
 local bluetoothDevices = bluetoothConfig and bluetoothConfig.devices or {}
@@ -36,7 +37,7 @@ local function isConnectedBluetooth(DeviceID)
 end
 
 -- 开关蓝牙
-function BluetoothSwitch(state)
+function Bluetooth.switch(state)
     if configError ~= nil then
         return
     end
@@ -44,14 +45,14 @@ function BluetoothSwitch(state)
     -- state: 0(off), 1(on)
     if state == 1 then
         print("开启蓝牙")
-		hs.notify.new({title="蓝牙", informativeText="开启蓝牙"}):send()
+        hs.notify.new({ title = "蓝牙", informativeText = "开启蓝牙" }):send()
     elseif state == 0 then
         print("关闭蓝牙")
     end
 
     -- 判断蓝牙状态
     local cmd = blueutilPath .. " --power"
-    local succeeded, result = hs.osascript.applescript(string.format('do shell script "%s"', cmd))
+    local _, result = hs.osascript.applescript(string.format('do shell script "%s"', cmd))
 
     if tonumber(result) ~= state then
         local cmdSetState = blueutilPath .. " --power " .. state
@@ -60,7 +61,7 @@ function BluetoothSwitch(state)
 end
 
 --关闭我的设置
-function CloseMyBluetooth()
+function Bluetooth.disconnectConfigured()
     if configError ~= nil then
         return
     end
@@ -72,3 +73,5 @@ function CloseMyBluetooth()
         end
     end
 end
+
+return Bluetooth

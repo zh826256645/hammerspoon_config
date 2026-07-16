@@ -1,4 +1,5 @@
 -- Clash 配置
+local Wifi = {}
 local homeDir = os.getenv("HOME")
 local wifiConfig = require("config").wifi
 local companyWifi = wifiConfig and wifiConfig.company
@@ -258,7 +259,7 @@ local function ssidChangedCallback()      -- 回调
 end
 
 -- 注册 Wi-Fi 监控
-function RegisterWifiWatcher()
+function Wifi.registerWatcher()
     if configError ~= nil then
         hs.notify.new({ title = "Wi-Fi", informativeText = configError }):send()
         return nil
@@ -269,7 +270,7 @@ function RegisterWifiWatcher()
 end
 
 -- 开关 Wi-Fi
-function WifiSwitch(state)
+function Wifi.switch(state)
     if state == 1 then
         print("开启 Wi-Fi")
         hs.notify.new({ title = "Wi-Fi", informativeText = "开启 Wi-Fi" }):send()
@@ -279,3 +280,5 @@ function WifiSwitch(state)
         hs.wifi.setPower(false)
     end
 end
+
+return Wifi
