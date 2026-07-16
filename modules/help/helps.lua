@@ -1,54 +1,53 @@
--- 快捷键说明文档
+-- 快捷键说明
 
-local function windowHelps(menuData)
-    local subWindowMenuData = {}
-    table.insert(menuData, { title="窗口快捷键", menu=subWindowMenuData})
-    table.insert(subWindowMenuData, { title="左吸附              ^⌥⌘←"})
-    table.insert(subWindowMenuData, { title="右吸附              ^⌥⌘→"})
-    table.insert(subWindowMenuData, { title="上吸附              ^⌥⌘↑"})
-    table.insert(subWindowMenuData, { title="下吸附              ^⌥⌘↓"})
-    table.insert(subWindowMenuData, { title="-" })
-    table.insert(subWindowMenuData, { title="左上角              ^⌥⇧←"})
-    table.insert(subWindowMenuData, { title="右下角              ^⌥⇧→"})
-    table.insert(subWindowMenuData, { title="右上角              ^⌥⇧↑"})
-    table.insert(subWindowMenuData, { title="左下角              ^⌥⇧↓"})
-    table.insert(subWindowMenuData, { title="-" })
-    table.insert(subWindowMenuData, { title="到上个屏幕       ⌥⇧←"})
-    table.insert(subWindowMenuData, { title="到下个屏幕       ⌥⇧→"})
-    table.insert(subWindowMenuData, { title="-" })
-    table.insert(subWindowMenuData, { titlge="最大化              ^⌥⌘M"})
-    table.insert(subWindowMenuData, { title="全屏幕              ^⌥⌘F"})
-    table.insert(subWindowMenuData, { title="屏幕居中          ^⌥⌘C"})
+local menuData = {
+    {
+        title = "窗口快捷键",
+        menu = {
+            { title = "左/右/上/下吸附              ⌃⌥⌘ + 方向键" },
+            { title = "四角吸附                         ⌃⌥⇧ + 方向键" },
+            { title = "最大化                             ⌃⌥⌘M" },
+            { title = "全屏                                ⌃⌥⌘F" },
+            { title = "居中                                ⌃⌥⌘C" },
+            { title = "移动到前/后屏幕                 ⌥⇧ + ←/→" },
+            { title = "移动到屏幕 1/2/3                ⌥⇧ + 1/2/3" },
+            { title = "切换应用窗口                      ⌥⇧H" },
+            { title = "窗口提示                           ⌥⇧/" },
+        },
+    },
+    { title = "-" },
+    {
+        title = "应用快捷键",
+        menu = {
+            { title = "Finder                              ⌘E" },
+            { title = "Alacritty                           ⌃⌥T" },
+            { title = "Edge                                 ⌃⌘G" },
+            { title = "VS Code（工作模式）             ⌃⌘V" },
+            { title = "Codex（工作模式）                ⌃⌘Z" },
+            { title = "Launchpad                         ⌃⌘L" },
+            { title = "Notion                              ⌃⌘N" },
+            { title = "Reeder                              ⌃⌘R" },
+            { title = "Podcasts                           ⌃⌘P" },
+        },
+    },
+    { title = "-" },
+    {
+        title = "其他快捷键",
+        menu = {
+            { title = "切换工作/娱乐模式               ⌃⌥⌘W" },
+            { title = "粘贴板历史                        ⌘⇧V" },
+            { title = "显示本帮助                        ⌃⌥⌘/" },
+        },
+    },
+}
 
-    local subProgramMenuData = {}
-    table.insert(menuData, { title="-" })
-    table.insert(menuData, { title="程序快捷键", menu=subProgramMenuData})
-    table.insert(subProgramMenuData, { title="iTerm              ⌃⌥T"})
-    table.insert(subProgramMenuData, { title="Finder              ⌘E"})
-    table.insert(subProgramMenuData, { title="Chrome          ⌃⌘G"})
-    table.insert(subProgramMenuData, { title="VSCode          ⌃⌘V"})
-    table.insert(subProgramMenuData, { title="Launchpad     ⌃⌘L"})
-    table.insert(subProgramMenuData, { title="Notion            ⌃⌘N"})
-    table.insert(subProgramMenuData, { title="Reeder           ⌃⌘R"})
-    table.insert(subProgramMenuData, { title="Netease         ⌃⌘W"})
-    table.insert(subProgramMenuData, { title="QQMusic        ⌃⌘Y"})
-end
-
-local function updateHelpMenu(menuBar, menuData)
-    menuBar:setMenu(menuData)
-end
-
--- 注册帮助界面
 function RegisterHelpMenu()
-    HelpMenubar = hs.menubar.new()
-    local menuData = {}
+    local helpMenu = assert(hs.menubar.new(false), "创建帮助菜单失败")
+    helpMenu:setMenu(menuData)
 
-    HelpMenubar:setTooltip("helps")
-    HelpMenubar:setTitle("🔖")
+    local helpHotkey = hs.hotkey.bind(CmdCtrlAltHyper, "/", function()
+        helpMenu:popupMenu(hs.mouse.absolutePosition())
+    end)
 
-    windowHelps(menuData)
-
-    updateHelpMenu(HelpMenubar, menuData)
-
-    return HelpMenubar
+    return { menu = helpMenu, hotkey = helpHotkey }
 end

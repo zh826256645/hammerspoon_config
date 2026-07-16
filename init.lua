@@ -13,6 +13,7 @@ require "modules/bluetooth/blueutils"
 require "modules/application/application"
 require "modules/monitor/monitor"
 require "modules/pasteboard/pasteboard"
+require "modules/pasteboard/history"
 require "modules/wifi/wifi"
 require "modules/input_method/input_method"
 require "modules/help/helps"
@@ -48,14 +49,18 @@ Monitor:start()
 PasteboardWatcher = RegisterPasteboardWatcher()
 PasteboardWatcher:start()
 
+-- 注册剪贴板历史
+ClipboardHistory = RegisterClipboardHistory()
+ClipboardHistory:start()
+
 -- 注册 wifi 监控
 WifiWatcher = RegisterWifiWatcher()
 if WifiWatcher ~= nil then
     WifiWatcher:start()
 end
 
--- 注册帮助面板
--- RegisterHelpMenu()
+-- 注册帮助快捷键
+HelpMenu = RegisterHelpMenu()
 
 -- 注册输入法提示
 RemindCurrentInputMethod()
