@@ -1,15 +1,33 @@
 -- 天气组件
-local cityId = 'dEibM'
+local weatherConfig = require("config").weather
+local configError = nil
+
+local function requiredString(key)
+    local value = weatherConfig and weatherConfig[key]
+    if type(value) ~= "string" or value == "" then
+        configError = "缺少 config.weather." .. key
+        return nil
+    end
+    return value
+end
+
+local cityId = requiredString("cityId")
 local currentWeatherUrl = 'http://www.nmc.cn/f/rest/real/%s'
 -- local sevenDaysWeatherUrl = 'http://www.nmc.cn/f/rest/tempchart/%s'
-local weatherPageUrl = 'http://www.nmc.cn/publish/forecast/AGD/meixian.html'
+local weatherPageUrl = requiredString("pageUrl")
 local detailWeatherUrl = 'http://www.nmc.cn/rest/weather?stationid=%s&_=%s000'
-local weatherScriptDir = '/Users/zhonghao/Projects/weather_landscape'
-local weatherScriptPython = '/Users/zhonghao/miniconda3/envs/zhonghao/bin/python'
-local weatherScriptArgs = { 'run_test.py' }
-local forecastJsonPath = '/Users/zhonghao/Projects/weather_landscape/tmp/openweathermap_fcst_03B3D811B884.json'
-local darkWeatherImagePath = '/Users/zhonghao/Projects/weather_landscape/tmp/landscape_rgb_b.png'
-local lightWeatherImagePath = '/Users/zhonghao/Projects/weather_landscape/tmp/landscape_rgb_w.png'
+local weatherScriptDir = requiredString("scriptDir")
+local weatherScriptPython = requiredString("pythonPath")
+local weatherScriptArgs = weatherConfig and weatherConfig.scriptArgs
+local forecastJsonPath = requiredString("forecastJsonPath")
+local darkWeatherImagePath = requiredString("darkImagePath")
+local lightWeatherImagePath = requiredString("lightImagePath")
+if type(weatherScriptArgs) ~= "table" then
+    configError = "缺少 config.weather.scriptArgs"
+end
+if configError ~= nil then
+    print("天气组件已停用: " .. configError)
+end
 local weatherImageTargetWidth = 400
 local weatherAlertCooldownSeconds = 3 * 60 * 60
 local weatherAlertWindowSeconds = 3 * 60 * 60
@@ -303,6 +321,10 @@ end
 
 -- 获取天气信息
 function GetWeather()
+    if configError ~= nil then
+        return
+    end
+
     print("更新天气")
     weatherRequestId = weatherRequestId + 1
     local currentRequestId = weatherRequestId
@@ -375,6 +397,11 @@ end
 
 -- 注册天气组件
 function RegisterWeatherComponent()
+    if configError ~= nil then
+        hs.notify.new({ title = "天气", informativeText = configError }):send()
+        return nil
+    end
+
     WeatherMenubar:setTitle('⌛')
     WeatherMenubar:setTooltip("Weather Info")
 

@@ -1,19 +1,37 @@
 -- Clash 配置
 local homeDir = os.getenv("HOME")
+local wifiConfig = require("config").wifi
+local companyWifi = wifiConfig and wifiConfig.company
+local homeWifi = wifiConfig and wifiConfig.home
+local configError = nil
+
+if type(companyWifi) ~= "table" or type(companyWifi.ssid) ~= "string" or companyWifi.ssid == ""
+    or type(companyWifi.configName) ~= "string" or companyWifi.configName == "" then
+    configError = "缺少 config.wifi.company 配置"
+elseif type(homeWifi) ~= "table" or type(homeWifi.ssid) ~= "string" or homeWifi.ssid == ""
+    or type(homeWifi.configName) ~= "string" or homeWifi.configName == ""
+    or type(homeWifi.volume) ~= "number" then
+    configError = "缺少 config.wifi.home 配置"
+end
+
+if configError ~= nil then
+    print("Wi-Fi 自动切换已停用: " .. configError)
+end
+
 local clashApiUrl = "http://127.0.0.1:9090/configs"
 local sparkleProfileStatePath = homeDir .. "/Library/Application Support/sparkle/profile.yaml"
-local sparkleProfileDisplayNames = {
-    socloud = "socloud",
-    paofuCloud = "paofu",
-}
-local homeWifiVolume = 43
+local sparkleProfileDisplayNames = {}
+local homeWifiVolume = homeWifi and homeWifi.volume
 local configSwitchCooldownSeconds = 10
 local lastConfigActionName = nil
 local lastConfigActionAt = 0
-local profileSourceOverrides = {
-    socloud = homeDir .. "/Library/Application Support/sparkle/profiles/19d8465b411.yaml",
-    paofuCloud = homeDir .. "/Library/Application Support/sparkle/profiles/19dc250e855.yaml",
-}
+local profileSourceOverrides = {}
+if configError == nil then
+    sparkleProfileDisplayNames[companyWifi.configName] = companyWifi.displayName
+    sparkleProfileDisplayNames[homeWifi.configName] = homeWifi.displayName
+    profileSourceOverrides[companyWifi.configName] = companyWifi.sourcePath
+    profileSourceOverrides[homeWifi.configName] = homeWifi.sourcePath
+end
 local runtimeConfigDirCandidates = {
     homeDir .. "/Library/Application Support/sparkle/work",
     homeDir .. "/.config/mihomo",
@@ -229,18 +247,23 @@ end
 local function ssidChangedCallback()      -- 回调
     local ssid = hs.wifi.currentNetwork() -- 获取当前 WiFi ssid
     if (ssid ~= nil) then
-        if (ssid == "TelkingNet_PC") then
+        if (ssid == companyWifi.ssid) then
             local extraMessage = MuteSystemAudio()
-            SwitchClashConfig("socloud", extraMessage)
-        elseif (ssid == "zhhh_5G") then
+            SwitchClashConfig(companyWifi.configName, extraMessage)
+        elseif (ssid == homeWifi.ssid) then
             local extraMessage = RestoreHomeWifiAudio()
-            SwitchClashConfig("paofuCloud", extraMessage)
+            SwitchClashConfig(homeWifi.configName, extraMessage)
         end
     end
 end
 
 -- 注册 Wi-Fi 监控
 function RegisterWifiWatcher()
+    if configError ~= nil then
+        hs.notify.new({ title = "Wi-Fi", informativeText = configError }):send()
+        return nil
+    end
+
     local wifiWatcher = hs.wifi.watcher.new(ssidChangedCallback)
     return wifiWatcher
 end

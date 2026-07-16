@@ -1,31 +1,46 @@
 -- 处理蓝牙
 
--- 蓝牙耳机地址
-local MyJblBlueDeviceID = 'F8-DF-15-99-71-35'
-local MySonyBlueDeviceID = '38-18-4C-95-C9-2E'
-local MyKeychronT2DeviceID = 'DC-2C-26-E7-5A-7D'
+local bluetoothConfig = require("config").bluetooth
+local blueutilPath = bluetoothConfig and bluetoothConfig.blueutilPath
+local bluetoothDevices = bluetoothConfig and bluetoothConfig.devices or {}
+local configError = nil
 
--- 连接对应地址的设备
--- local function connectBluetooth(DeviceID)
---     local cmd = "/usr/local/bin/blueutil --connect "..(DeviceID)
---     hs.osascript.applescript(string.format('do shell script "%s"', cmd))
--- end
+if type(blueutilPath) ~= "string" or blueutilPath == "" or type(bluetoothConfig and bluetoothConfig.devices) ~= "table" then
+    configError = "缺少 config.bluetooth 配置"
+elseif hs.fs.attributes(blueutilPath, "mode") ~= "file" then
+    configError = "未找到 blueutil: " .. blueutilPath
+else
+    for _, device in ipairs(bluetoothDevices) do
+        if type(device.name) ~= "string" or device.name == "" or type(device.id) ~= "string" or device.id == "" then
+            configError = "蓝牙设备缺少 name 或 id"
+            break
+        end
+    end
+end
+
+if configError ~= nil then
+    print("蓝牙控制已停用: " .. configError)
+end
 
 -- 断开对应地址的设备
 local function disconnectBluetooth(DeviceID)
-    local cmd = "/usr/local/bin/blueutil --disconnect "..(DeviceID)
+    local cmd = blueutilPath .. " --disconnect " .. DeviceID
     hs.osascript.applescript(string.format('do shell script "%s"', cmd))
 end
 
 -- 判断设备是否连接
 local function isConnectedBluetooth(DeviceID)
-    local cmd = "/usr/local/bin/blueutil --is-connected "..(DeviceID)
+    local cmd = blueutilPath .. " --is-connected " .. DeviceID
     local _, result = hs.osascript.applescript(string.format('do shell script "%s"', cmd))
     return tonumber(result)
 end
 
 -- 开关蓝牙
 function BluetoothSwitch(state)
+    if configError ~= nil then
+        return
+    end
+
     -- state: 0(off), 1(on)
     if state == 1 then
         print("开启蓝牙")
@@ -35,45 +50,25 @@ function BluetoothSwitch(state)
     end
 
     -- 判断蓝牙状态
-    local cmd = "/usr/local/bin/blueutil --power"
+    local cmd = blueutilPath .. " --power"
     local succeeded, result = hs.osascript.applescript(string.format('do shell script "%s"', cmd))
 
     if tonumber(result) ~= state then
-        local cmdSetState = "/usr/local/bin/blueutil --power "..(state)
+        local cmdSetState = blueutilPath .. " --power " .. state
         result = hs.osascript.applescript(string.format('do shell script "%s"', cmdSetState))
     end
 end
 
 --关闭我的设置
 function CloseMyBluetooth()
-    local jblState = isConnectedBluetooth(MyJblBlueDeviceID)
-    if jblState == 1 then
-        disconnectBluetooth(MyJblBlueDeviceID)
-        print("断开 JBL 蓝牙耳机")
+    if configError ~= nil then
+        return
     end
 
-    local sonyState = isConnectedBluetooth(MySonyBlueDeviceID)
-    if sonyState == 1 then
-        disconnectBluetooth(MySonyBlueDeviceID)
-        print("断开 Sony 蓝牙耳机")
-    end
-
-    local keychronT2State = isConnectedBluetooth(MyKeychronT2DeviceID)
-    if keychronT2State == 1 then
-        disconnectBluetooth(MyKeychronT2DeviceID)
-        print("断开 Keychron T2 蓝牙键盘")
-    end
-end
-
--- 在多少秒后关闭蓝牙，如果屏幕依然熄灭
-function BluetoothSwitchAfter(sec, state)
-    print(sec.." 秒后如果屏幕依然上锁或者睡眠，将切换蓝牙")
-
-    hs.timer.doAfter(sec, function()
-        if (nowStatus == hs.caffeinate.watcher.screensDidSleep or nowStatus == hs.caffeinate.watcher.screensDidLock) then
-            BluetoothSwitch(state)
-        else
-            print("取消切换蓝牙")
+    for _, device in ipairs(bluetoothDevices) do
+        if isConnectedBluetooth(device.id) == 1 then
+            disconnectBluetooth(device.id)
+            print("断开 " .. device.name)
         end
-    end)
+    end
 end

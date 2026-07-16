@@ -1,5 +1,8 @@
 -- hammerspoon 入口文件‘
 
+local configLoaded, configError = pcall(require, "config")
+assert(configLoaded, "无法加载 config.lua，请复制 config.example.lua 并填写本机配置: " .. tostring(configError))
+
 require "modules/utils/stringUtils"
 require "modules/utils/utils"
 require "modules/shortcuts/hotkey"
@@ -27,7 +30,9 @@ BindWindowFocusSwitch()
 
 -- 天气组件
 WeatherComponent = RegisterWeatherComponent()
-WeatherComponent:start()
+if WeatherComponent ~= nil then
+    WeatherComponent:start()
+end
 
 -- 注册电脑模式
 ComputerMode = RegisterComputerMode()
@@ -45,7 +50,9 @@ PasteboardWatcher:start()
 
 -- 注册 wifi 监控
 WifiWatcher = RegisterWifiWatcher()
-WifiWatcher:start()
+if WifiWatcher ~= nil then
+    WifiWatcher:start()
+end
 
 -- 注册帮助面板
 -- RegisterHelpMenu()
