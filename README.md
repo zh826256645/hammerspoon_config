@@ -22,14 +22,16 @@
 - 其他模块可通过 `onChange` 响应模式变化
 
 [blueutils](./modules/bluetooth/blueutils.lua): 控制蓝牙
-- 连接/断开指定蓝牙设备（JBL、Sony 耳机、Keychron 键盘）
+- 断开 `config.lua` 中配置的蓝牙设备
 - 开关蓝牙
 - 屏幕休眠后断开蓝牙设备
 
-[helps](./modules/help/helps.lua): 帮助菜单（默认已注释，按需启用）
+[helps](./modules/help/helps.lua): 快捷键帮助
+- 使用 ⌃ + ⌥ + ⌘ + / 显示帮助菜单
 
 [history](./modules/pasteboard/history.lua): 粘贴板历史记录
 - ⌘ + ⇧ + V 弹出粘贴板历史菜单
+- 默认保存最近 100 条文本记录，Option 选择可直接输入
 
 [pasteboard](./modules/pasteboard/pasteboard.lua): 粘贴板数据处理
 - 去除复制的字符串左右两边的空格
@@ -44,7 +46,7 @@
 - 通过 Python 脚本处理 OpenWeatherMap 预报数据，生成天气景观图
 - 天气图片生成依赖 [weather_landscape](https://github.com/lds133/weather_landscape) 项目
 - 异常天气提醒（雷暴、雾、霾、沙尘等）
-- 使用时需修改 CityID 和 forecastJsonPath 等路径配置
+- 城市、本地 Python 和图片路径从 `config.lua` 读取
 
 [windows](./modules/windows/windows.lua): 绑定窗口控制的快捷键
 - 左吸附 ^ + ⌥ + ⌘ + ←
@@ -68,7 +70,7 @@
 - 移动光标到下个屏幕 ⌘ + `
 
 [wifi](./modules/wifi/wifi.lua): Wi-Fi 配置自动切换
-- 根据当前连接的 Wi-Fi SSID 自动切换 Clash 配置（公司：soclash / 家里：PaofuCloud）
+- 根据 `config.lua` 中的公司/家庭 SSID 自动切换代理配置与系统音量
 - 开关 Wi-Fi
 
 [input_method](./modules/input_method/input_method.lua): 输入法提示
@@ -93,6 +95,21 @@ mv ~/.hammerspoon/ ~/.hammerspoon_back_up/
 git clone https://github.com/zh826256645/hammerspoon_config.git ~/.hammerspoon/
 
 ```
+
+复制配置模板并填写本机值：
+
+```shell script
+cp ~/.hammerspoon/config.example.lua ~/.hammerspoon/config.lua
+```
+
+`config.lua` 已加入 `.gitignore`，用于保存 Wi-Fi、蓝牙设备和天气脚本等本机配置，不会提交到公开仓库。
+
+外部依赖：
+
+- Hammerspoon
+- `blueutil`（蓝牙控制）
+- Sparkle 或支持 `PUT /configs` 的 Mihomo/Clash（代理配置切换）
+- Python 与 `weather_landscape`（天气景观图，可选）
 
 让 hammerspoon `Reload Config` 进行配置文件重载
 
