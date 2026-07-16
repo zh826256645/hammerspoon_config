@@ -100,7 +100,13 @@ local function caffeinateCallback(eventType)
         monitorEventId = monitorEventId + 1
         nowStatus = eventType
         print("解锁")
+        if pendingCloseTimer ~= nil then
+            print("取消睡眠关闭任务")
+        end
         pendingCloseTimer = stopTimer(pendingCloseTimer)
+        if pendingOpenTimer ~= nil then
+            print("取消唤醒预打开任务")
+        end
         pendingOpenTimer = stopTimer(pendingOpenTimer)
         -- blueUtils:connectBluetooth(MyBlueDeviceID) --
         -- bluetoothSwitch(1)
