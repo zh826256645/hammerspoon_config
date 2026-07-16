@@ -4,6 +4,8 @@ local pendingCloseTimer = nil
 local pendingOpenTimer = nil
 local monitorEventId = 0
 local nowStatus = nil
+local bluetoothControl = nil
+local wifiControl = nil
 
 local function stopTimer(timer)
     if timer ~= nil then
@@ -35,12 +37,12 @@ local function closeAfter(sec)
                 CloseApplication(TheWeWorkBundleID, "企业微信")
             end
             CloseApplication(TheYinLiuBundleID, "音流")
-            CloseMyBluetooth()
+            bluetoothControl.disconnectConfigured()
 
             if not ComputerMode:isWorkMode() then
                 Sleep(2)
-                BluetoothSwitch(0)
-                WifiSwitch(0)
+                bluetoothControl.switch(0)
+                wifiControl.switch(0)
             end
         else
             print("取消睡眠关闭任务")
@@ -66,8 +68,8 @@ local function openAfter(sec)
         end
 
         if (nowStatus ~= hs.caffeinate.watcher.screensDidSleep) then
-            BluetoothSwitch(1)
-            WifiSwitch(1)
+            bluetoothControl.switch(1)
+            wifiControl.switch(1)
         else
             print("取消唤醒预打开任务")
         end
@@ -104,8 +106,8 @@ local function caffeinateCallback(eventType)
         -- bluetoothSwitch(1)
         -- GetWeather()
         print("解锁后立即打开蓝牙与 Wi-Fi")
-        BluetoothSwitch(1)
-        WifiSwitch(1)
+        bluetoothControl.switch(1)
+        wifiControl.switch(1)
         OpenApplication(TheScrollReverserID)
     else
         print("忽略未处理的 caffeinate 事件: " .. tostring(eventType))
@@ -113,7 +115,14 @@ local function caffeinateCallback(eventType)
 end
 
 -- 注册监控
-function RegisterMonitor()
+function RegisterMonitor(bluetooth, wifi)
+    assert(type(bluetooth) == "table" and type(bluetooth.switch) == "function"
+        and type(bluetooth.disconnectConfigured) == "function", "monitor 缺少蓝牙控制函数")
+    assert(type(wifi) == "table" and type(wifi.switch) == "function", "monitor 缺少 Wi-Fi 控制函数")
+
+    bluetoothControl = bluetooth
+    wifiControl = wifi
+
     local monitor = hs.caffeinate.watcher.new(caffeinateCallback)
     return monitor
 end
