@@ -97,3 +97,7 @@ git clone https://github.com/zh826256645/hammerspoon_config.git ~/.hammerspoon/
 让 hammerspoon `Reload Config` 进行配置文件重载
 
 如果不需要某些功能，直接在 [init.lua](init.lua) 中进行注释
+
+## Governance
+
+项目整理与后续改动规则见 [Hammerspoon 配置治理方案](./GOVERNANCE.md)。
