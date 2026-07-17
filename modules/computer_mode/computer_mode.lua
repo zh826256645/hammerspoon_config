@@ -5,6 +5,71 @@ local EntertainmentMode = "entertainment"
 local ModeSettingKey = "computerMode"
 local MorningCheckedDateKey = "computerModeMorningCheckedDate"
 local EveningCheckedDateKey = "computerModeEveningCheckedDate"
+local HotCornerSnapshotSettingKey = "computerModeHotCornerSnapshot"
+local HotCornerKeys = {
+    "wvous-tl-corner",
+    "wvous-tr-corner",
+    "wvous-bl-corner",
+    "wvous-br-corner",
+}
+
+local function readHotCorner(key)
+    local output, success = hs.execute("/usr/bin/defaults read com.apple.dock " .. key)
+    return success and tonumber(output) or false
+end
+
+local function writeHotCorner(key, value)
+    if value ~= false and type(value) ~= "number" then
+        print("忽略无效的触发角设置: " .. key)
+        return false
+    end
+
+    local command = value == false
+        and "/usr/bin/defaults delete com.apple.dock " .. key
+        or string.format("/usr/bin/defaults write com.apple.dock %s -int %d", key, value)
+    local output, success = hs.execute(command)
+    success = success or (value == false and readHotCorner(key) == false)
+    if not success then
+        print("更新触发角失败 (" .. key .. "): " .. tostring(output))
+    end
+    return success
+end
+
+local function hotCornerValueForMode(mode, savedSettings, key)
+    return mode == EntertainmentMode and 0 or savedSettings[key]
+end
+
+assert(hotCornerValueForMode(EntertainmentMode, {}, "corner") == 0
+    and hotCornerValueForMode(WorkMode, { corner = 5 }, "corner") == 5)
+
+local function updateHotCornersForMode(mode)
+    local savedSettings = hs.settings.get(HotCornerSnapshotSettingKey)
+
+    if mode == EntertainmentMode and savedSettings == nil then
+        savedSettings = {}
+        for _, key in ipairs(HotCornerKeys) do
+            savedSettings[key] = readHotCorner(key)
+        end
+        hs.settings.set(HotCornerSnapshotSettingKey, savedSettings)
+    elseif mode == WorkMode and savedSettings == nil then
+        return
+    end
+
+    local success = true
+    for _, key in ipairs(HotCornerKeys) do
+        success = writeHotCorner(key, hotCornerValueForMode(mode, savedSettings, key)) and success
+    end
+
+    if success then
+        if mode == WorkMode then
+            hs.settings.clear(HotCornerSnapshotSettingKey)
+        end
+        local output, restarted = hs.execute("/usr/bin/killall Dock")
+        if not restarted then
+            print("重启 Dock 失败，触发角设置将在下次 Dock 启动后生效: " .. tostring(output))
+        end
+    end
+end
 
 local function scheduledMode(now)
     local weekday = tonumber(os.date("%w", now))
@@ -66,6 +131,8 @@ function RegisterComputerMode()
     function controller:toggle()
         self:setMode(self:isWorkMode() and EntertainmentMode or WorkMode)
     end
+
+    controller:onChange(updateHotCornersForMode)
 
     hs.hotkey.bind(CmdCtrlAltHyper, 'W', function()
         controller:toggle()
