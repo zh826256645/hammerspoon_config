@@ -60,8 +60,11 @@ local function updateHotCornersForMode(mode)
         success = writeHotCorner(key, hotCornerValueForMode(mode, savedSettings, key)) and success
     end
 
-    if success and mode == WorkMode then
-        hs.settings.clear(HotCornerSnapshotSettingKey)
+    if success then
+        if mode == WorkMode then
+            hs.settings.clear(HotCornerSnapshotSettingKey)
+        end
+        hs.distributednotifications.post("com.apple.dock.prefchanged")
     end
 end
 
