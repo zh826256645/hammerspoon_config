@@ -5,6 +5,99 @@ local EntertainmentMode = "entertainment"
 local ModeSettingKey = "computerMode"
 local MorningCheckedDateKey = "computerModeMorningCheckedDate"
 local EveningCheckedDateKey = "computerModeEveningCheckedDate"
+local HotCornerSnapshotSettingKey = "computerModeHotCornerSnapshot"
+local DisabledHotCornerAction = 1
+local DisabledHotCornerModifier = 0
+local HotCorners = {
+    { actionKey = "wvous-tl-corner", modifierKey = "wvous-tl-modifier" },
+    { actionKey = "wvous-tr-corner", modifierKey = "wvous-tr-modifier" },
+    { actionKey = "wvous-bl-corner", modifierKey = "wvous-bl-modifier" },
+    { actionKey = "wvous-br-corner", modifierKey = "wvous-br-modifier" },
+}
+
+local function readDockSetting(key)
+    local output, success = hs.execute("/usr/bin/defaults read com.apple.dock " .. key)
+    return success and tonumber(output) or false
+end
+
+local function hotCornerSettingsForMode(mode, savedSettings)
+    local settings = {}
+    for index, corner in ipairs(HotCorners) do
+        settings[index] = mode == EntertainmentMode
+            and { action = DisabledHotCornerAction, modifier = DisabledHotCornerModifier }
+            or {
+                action = savedSettings[corner.actionKey] or DisabledHotCornerAction,
+                modifier = savedSettings[corner.modifierKey] or DisabledHotCornerModifier,
+            }
+    end
+    return settings
+end
+
+local disabledSettings = hotCornerSettingsForMode(EntertainmentMode, {})
+local restoredSettings = hotCornerSettingsForMode(WorkMode, {
+    ["wvous-tr-corner"] = 5,
+    ["wvous-tr-modifier"] = 131072,
+})
+assert(disabledSettings[2].action == DisabledHotCornerAction
+    and disabledSettings[2].modifier == DisabledHotCornerModifier
+    and restoredSettings[2].action == 5
+    and restoredSettings[2].modifier == 131072)
+
+local function applyHotCornerSettings(settings)
+    local calls = {}
+    for index, setting in ipairs(settings) do
+        if type(setting.action) ~= "number" or type(setting.modifier) ~= "number" then
+            print("忽略无效的触发角设置: " .. tostring(index))
+            return false
+        end
+        table.insert(calls, string.format(
+            "$.CoreDockSetExposeCornerActionWithModifier(%d, %d, %d);",
+            setting.action,
+            index - 1,
+            setting.modifier
+        ))
+    end
+
+    local script = [=[
+ObjC.import("ApplicationServices");
+ObjC.bindFunction("CoreDockSetExposeCornerActionWithModifier", ["void", ["int", "int", "int"]]);
+]=] .. table.concat(calls, "\n")
+    local success, _, details = hs.osascript.javascript(script)
+    if not success then
+        print("更新触发角失败: " .. hs.inspect(details))
+    end
+    return success
+end
+
+local function updateHotCornersForMode(mode)
+    local savedSettings = hs.settings.get(HotCornerSnapshotSettingKey)
+
+    if mode == EntertainmentMode and savedSettings == nil then
+        savedSettings = {}
+        for _, corner in ipairs(HotCorners) do
+            savedSettings[corner.actionKey] = readDockSetting(corner.actionKey)
+            savedSettings[corner.modifierKey] = readDockSetting(corner.modifierKey)
+        end
+        hs.settings.set(HotCornerSnapshotSettingKey, savedSettings)
+    elseif mode == WorkMode and savedSettings == nil then
+        return
+    end
+
+    local snapshotUpdated = false
+    for _, corner in ipairs(HotCorners) do
+        if savedSettings[corner.modifierKey] == nil then
+            savedSettings[corner.modifierKey] = readDockSetting(corner.modifierKey)
+            snapshotUpdated = true
+        end
+    end
+    if snapshotUpdated then
+        hs.settings.set(HotCornerSnapshotSettingKey, savedSettings)
+    end
+
+    if applyHotCornerSettings(hotCornerSettingsForMode(mode, savedSettings)) and mode == WorkMode then
+        hs.settings.clear(HotCornerSnapshotSettingKey)
+    end
+end
 
 local function scheduledMode(now)
     local weekday = tonumber(os.date("%w", now))
@@ -66,6 +159,8 @@ function RegisterComputerMode()
     function controller:toggle()
         self:setMode(self:isWorkMode() and EntertainmentMode or WorkMode)
     end
+
+    controller:onChange(updateHotCornersForMode)
 
     hs.hotkey.bind(CmdCtrlAltHyper, 'W', function()
         controller:toggle()
