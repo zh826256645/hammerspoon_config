@@ -6,65 +6,96 @@ local ModeSettingKey = "computerMode"
 local MorningCheckedDateKey = "computerModeMorningCheckedDate"
 local EveningCheckedDateKey = "computerModeEveningCheckedDate"
 local HotCornerSnapshotSettingKey = "computerModeHotCornerSnapshot"
-local HotCornerKeys = {
-    "wvous-tl-corner",
-    "wvous-tr-corner",
-    "wvous-bl-corner",
-    "wvous-br-corner",
+local DisabledHotCornerAction = 1
+local DisabledHotCornerModifier = 0
+local HotCorners = {
+    { actionKey = "wvous-tl-corner", modifierKey = "wvous-tl-modifier" },
+    { actionKey = "wvous-tr-corner", modifierKey = "wvous-tr-modifier" },
+    { actionKey = "wvous-bl-corner", modifierKey = "wvous-bl-modifier" },
+    { actionKey = "wvous-br-corner", modifierKey = "wvous-br-modifier" },
 }
 
-local function readHotCorner(key)
+local function readDockSetting(key)
     local output, success = hs.execute("/usr/bin/defaults read com.apple.dock " .. key)
     return success and tonumber(output) or false
 end
 
-local function writeHotCorner(key, value)
-    if value ~= false and type(value) ~= "number" then
-        print("忽略无效的触发角设置: " .. key)
-        return false
+local function hotCornerSettingsForMode(mode, savedSettings)
+    local settings = {}
+    for index, corner in ipairs(HotCorners) do
+        settings[index] = mode == EntertainmentMode
+            and { action = DisabledHotCornerAction, modifier = DisabledHotCornerModifier }
+            or {
+                action = savedSettings[corner.actionKey] or DisabledHotCornerAction,
+                modifier = savedSettings[corner.modifierKey] or DisabledHotCornerModifier,
+            }
+    end
+    return settings
+end
+
+local disabledSettings = hotCornerSettingsForMode(EntertainmentMode, {})
+local restoredSettings = hotCornerSettingsForMode(WorkMode, {
+    ["wvous-tr-corner"] = 5,
+    ["wvous-tr-modifier"] = 131072,
+})
+assert(disabledSettings[2].action == DisabledHotCornerAction
+    and disabledSettings[2].modifier == DisabledHotCornerModifier
+    and restoredSettings[2].action == 5
+    and restoredSettings[2].modifier == 131072)
+
+local function applyHotCornerSettings(settings)
+    local calls = {}
+    for index, setting in ipairs(settings) do
+        if type(setting.action) ~= "number" or type(setting.modifier) ~= "number" then
+            print("忽略无效的触发角设置: " .. tostring(index))
+            return false
+        end
+        table.insert(calls, string.format(
+            "$.CoreDockSetExposeCornerActionWithModifier(%d, %d, %d);",
+            setting.action,
+            index - 1,
+            setting.modifier
+        ))
     end
 
-    local command = value == false
-        and "/usr/bin/defaults delete com.apple.dock " .. key
-        or string.format("/usr/bin/defaults write com.apple.dock %s -int %d", key, value)
-    local output, success = hs.execute(command)
-    success = success or (value == false and readHotCorner(key) == false)
+    local script = [=[
+ObjC.import("ApplicationServices");
+ObjC.bindFunction("CoreDockSetExposeCornerActionWithModifier", ["void", ["int", "int", "int"]]);
+]=] .. table.concat(calls, "\n")
+    local success, _, details = hs.osascript.javascript(script)
     if not success then
-        print("更新触发角失败 (" .. key .. "): " .. tostring(output))
+        print("更新触发角失败: " .. hs.inspect(details))
     end
     return success
 end
-
-local function hotCornerValueForMode(mode, savedSettings, key)
-    return mode == EntertainmentMode and 0 or savedSettings[key]
-end
-
-assert(hotCornerValueForMode(EntertainmentMode, {}, "corner") == 0
-    and hotCornerValueForMode(WorkMode, { corner = 5 }, "corner") == 5)
 
 local function updateHotCornersForMode(mode)
     local savedSettings = hs.settings.get(HotCornerSnapshotSettingKey)
 
     if mode == EntertainmentMode and savedSettings == nil then
         savedSettings = {}
-        for _, key in ipairs(HotCornerKeys) do
-            savedSettings[key] = readHotCorner(key)
+        for _, corner in ipairs(HotCorners) do
+            savedSettings[corner.actionKey] = readDockSetting(corner.actionKey)
+            savedSettings[corner.modifierKey] = readDockSetting(corner.modifierKey)
         end
         hs.settings.set(HotCornerSnapshotSettingKey, savedSettings)
     elseif mode == WorkMode and savedSettings == nil then
         return
     end
 
-    local success = true
-    for _, key in ipairs(HotCornerKeys) do
-        success = writeHotCorner(key, hotCornerValueForMode(mode, savedSettings, key)) and success
+    local snapshotUpdated = false
+    for _, corner in ipairs(HotCorners) do
+        if savedSettings[corner.modifierKey] == nil then
+            savedSettings[corner.modifierKey] = readDockSetting(corner.modifierKey)
+            snapshotUpdated = true
+        end
+    end
+    if snapshotUpdated then
+        hs.settings.set(HotCornerSnapshotSettingKey, savedSettings)
     end
 
-    if success then
-        if mode == WorkMode then
-            hs.settings.clear(HotCornerSnapshotSettingKey)
-        end
-        hs.distributednotifications.post("com.apple.dock.prefchanged")
+    if applyHotCornerSettings(hotCornerSettingsForMode(mode, savedSettings)) and mode == WorkMode then
+        hs.settings.clear(HotCornerSnapshotSettingKey)
     end
 end
 
