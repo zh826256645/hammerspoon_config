@@ -60,14 +60,8 @@ local function updateHotCornersForMode(mode)
         success = writeHotCorner(key, hotCornerValueForMode(mode, savedSettings, key)) and success
     end
 
-    if success then
-        if mode == WorkMode then
-            hs.settings.clear(HotCornerSnapshotSettingKey)
-        end
-        local output, restarted = hs.execute("/usr/bin/killall Dock")
-        if not restarted then
-            print("重启 Dock 失败，触发角设置将在下次 Dock 启动后生效: " .. tostring(output))
-        end
+    if success and mode == WorkMode then
+        hs.settings.clear(HotCornerSnapshotSettingKey)
     end
 end
 
