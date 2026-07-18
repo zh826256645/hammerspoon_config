@@ -1,6 +1,15 @@
 local homeDir = os.getenv("HOME")
 
 return {
+    applications = {
+        { name = "Finder", bundleId = "com.apple.finder", modifiers = { "cmd" }, key = "E" },
+        { name = "Alacritty", bundleId = "org.alacritty", modifiers = { "ctrl", "alt" }, key = "T" },
+        { name = "Edge", bundleId = "com.microsoft.edgemac", modifiers = { "cmd", "ctrl" }, key = "G" },
+        { name = "VS Code", bundleId = "com.microsoft.VSCode", modifiers = { "cmd", "ctrl" }, key = "V", workModeOnly = true },
+        { name = "Podcasts", bundleId = "com.apple.podcasts", modifiers = { "cmd", "ctrl" }, key = "P" },
+        { name = "音流", bundleId = "cn.aqzscn.streamMusic", modifiers = { "cmd", "ctrl" }, key = "M" },
+        { name = "Codex", bundleId = "com.openai.codex", modifiers = { "cmd", "ctrl" }, key = "Z", workModeOnly = true },
+    },
     bluetooth = {
         blueutilPath = "/path/to/blueutil",
         devices = {

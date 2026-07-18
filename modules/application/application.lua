@@ -1,29 +1,45 @@
 -- 处理应用
 
+local applicationShortcuts = require("config").applications
+
 TheWeChatBundleID = "com.tencent.xinWeChat"
 TheWeWorkBundleID = "com.tencent.WeWorkMac"
-TheQQBundleID = "com.tencent.qq"
-TheFinderID = "com.apple.finder"
-TheIterm2ID = "com.googlecode.iterm2"
-TheAlacrittyID = "org.alacritty"
-TheWarpID = "dev.warp.Warp-Stable"
-TheQQID = 'com.tencent.mqq'
-TheChromeID = "com.google.Chrome"
-TheEdgeID = "com.microsoft.edgemac"
-TheVSCodeID = "com.microsoft.VSCode"
-TheLaunchpadID = "com.apple.launchpad.launcher"
-TheNotionID = "notion.id"
 TheScrollReverserID = "com.pilotmoon.scroll-reverser"
-TheReederID = "com.reederapp.macOS"
-TheNeteaseID = "com.netease.163music"
-TheQQMusicID = "com.tencent.QQMusicMac"
-TheSpotifyID = "com.spotify.client"
-TheYouTubeMusicID = "com.google.Chrome.app.cinhimbnkkaeohfgghhklpknlkffjgod"
-ThePodcastsMusicID = "com.apple.podcasts"
-TheCodexID = "com.openai.codex"
 TheYinLiuBundleID = "cn.aqzscn.streamMusic"
 
 local workModeHotkeys = {}
+local validModifiers = { cmd = true, ctrl = true, alt = true, shift = true }
+
+if type(applicationShortcuts) ~= "table" then
+    print("应用快捷键已停用: 缺少 config.applications 配置")
+    applicationShortcuts = {}
+end
+
+local function isValidApplicationShortcut(shortcut)
+    if type(shortcut) ~= "table"
+        or type(shortcut.name) ~= "string" or shortcut.name == ""
+        or type(shortcut.bundleId) ~= "string" or shortcut.bundleId == ""
+        or type(shortcut.modifiers) ~= "table"
+        or type(shortcut.key) ~= "string" or shortcut.key == ""
+        or (shortcut.workModeOnly ~= nil and type(shortcut.workModeOnly) ~= "boolean") then
+        return false
+    end
+
+    for _, modifier in ipairs(shortcut.modifiers) do
+        if not validModifiers[modifier] then
+            return false
+        end
+    end
+
+    return true
+end
+
+assert(isValidApplicationShortcut({
+    name = "App",
+    bundleId = "com.example.app",
+    modifiers = { "cmd" },
+    key = "A",
+}) and not isValidApplicationShortcut({}))
 
 local function SetWorkModeHotkeysEnabled(enabled)
     for _, hotkey in ipairs(workModeHotkeys) do
@@ -58,43 +74,31 @@ function OpenApplication(bundleID)
     end
 end
 
--- 获取程序信息
--- local function getApplicationInfo(bundleID)
---     print(hs.application.infoForBundleID(bundleID))
--- end
-
 -- 绑定程序
 function BindApplicationShortcut(computerMode)
-    local settings = {
-        { 'Finder',         CmdHyper,     'E', TheFinderID },
-        -- {'Iterm2', CtrlAltHyper, 'T', TheIterm2ID},
-        { 'Alacritty',      CtrlAltHyper, 'T', TheAlacrittyID },
-        -- { 'Warp',      CtrlAltHyper, 'T', TheWarpID },
-        -- { 'Chrome',         CmdCtrlHyper, 'G', TheChromeID },
-        { 'Chrome',         CmdCtrlHyper, 'G', TheEdgeID },
-        { 'VSCode',         CmdCtrlHyper, 'V', TheVSCodeID, true },
-        { 'Launchpad',      CmdCtrlHyper, 'L', TheLaunchpadID },
-        { 'Notion',         CmdCtrlHyper, 'N', TheNotionID },
-        { 'Reeder',         CmdCtrlHyper, 'R', TheReederID },
-        -- { 'Netease',        CmdCtrlHyper, 'W', TheNeteaseID },
-        -- { 'QQMusic',        CmdCtrlHyper, 'Y', TheQQMusicID },
-        -- { 'Spotify',        CmdCtrlHyper, 'S', TheSpotifyID },
-        -- { 'YouTubeMusicID', CmdCtrlHyper, 'M', TheYouTubeMusicID },
-        { 'PodcastsMusic', CmdCtrlHyper, 'P', ThePodcastsMusicID },
-        { 'Codex', CmdCtrlHyper, 'Z', TheCodexID, true },
-    }
-    for _, value in ipairs(settings) do
-        local hotkey = hs.hotkey.bind(value[2], value[3], function()
-            hs.application.open(value[4])
-            hs.timer.doAfter(0.3, function()
-                hs.alert.show(value[1], 0.8)
+    local validShortcuts = {}
+
+    for index, shortcut in ipairs(applicationShortcuts) do
+        if not isValidApplicationShortcut(shortcut) then
+            print("忽略无效的应用快捷键配置: " .. tostring(index))
+        else
+            table.insert(validShortcuts, shortcut)
+            local hotkey = hs.hotkey.bind(shortcut.modifiers, shortcut.key, function()
+                hs.application.open(shortcut.bundleId)
+                hs.timer.doAfter(0.3, function()
+                    hs.alert.show(shortcut.name, 0.8)
+                end)
             end)
-        end)
-        if value[5] then
-            table.insert(workModeHotkeys, hotkey)
+
+            if shortcut.workModeOnly then
+                table.insert(workModeHotkeys, hotkey)
+            end
         end
     end
+
     computerMode:onChange(function()
         SetWorkModeHotkeysEnabled(computerMode:isWorkMode())
     end)
+
+    return validShortcuts
 end

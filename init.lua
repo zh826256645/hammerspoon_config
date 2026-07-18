@@ -39,7 +39,7 @@ end
 ComputerMode = RegisterComputerMode()
 
 -- 绑定软件快捷键
-BindApplicationShortcut(ComputerMode)
+local ApplicationShortcuts = BindApplicationShortcut(ComputerMode)
 
 -- 注册监控
 Monitor = RegisterMonitor(BluetoothControl, WifiControl)
@@ -60,7 +60,7 @@ if WifiWatcher ~= nil then
 end
 
 -- 注册帮助快捷键
-HelpMenu = RegisterHelpMenu()
+HelpMenu = RegisterHelpMenu(ApplicationShortcuts)
 
 -- 注册输入法提示
 RemindCurrentInputMethod()

@@ -24,17 +24,10 @@
 
 ### 应用快捷键
 
-| 应用 | 快捷键 | 说明 |
-| --- | --- | --- |
-| Finder | `⌘ + E` | 始终可用 |
-| Alacritty | `⌃⌥ + T` | 始终可用 |
-| Microsoft Edge | `⌃⌘ + G` | 始终可用 |
-| VS Code | `⌃⌘ + V` | 仅工作模式可用 |
-| Launchpad | `⌃⌘ + L` | 始终可用 |
-| Notion | `⌃⌘ + N` | 始终可用 |
-| Reeder | `⌃⌘ + R` | 始终可用 |
-| Podcasts | `⌃⌘ + P` | 始终可用 |
-| Codex | `⌃⌘ + Z` | 仅工作模式可用 |
+- 应用快捷键从 `config.applications` 读取，新增应用只需配置 `name`、`bundleId`、`modifiers` 和 `key` 后重载 Hammerspoon。
+- `modifiers` 支持 `cmd`、`ctrl`、`alt`、`shift`；设置 `workModeOnly = true` 后只在工作模式启用。
+- 快捷键帮助菜单会从同一配置自动生成，不需要同步修改代码或文档。
+- 完整配置示例见 [`config.example.lua`](./config.example.lua)。
 
 ### 工作 / 娱乐模式
 
@@ -42,7 +35,7 @@
 - 周一至周六每分钟检查一次：08:30（含）～09:30（含）当天首次检查切换到工作模式，18:10（含）后当天首次检查切换到娱乐模式；错过上午时间窗口后当天不会自动进入工作模式，周日不自动切换。
 - 当天是否已执行自动切换同样保存在 `hs.settings` 中，重载配置不会重复执行。
 - 娱乐模式会保存并关闭四个 macOS 触发角，回到工作模式时恢复原设置。
-- VS Code 和 Codex 快捷键只在工作模式启用。
+- 设置了 `workModeOnly = true` 的应用快捷键只在工作模式启用。
 - 屏幕休眠后的应用、蓝牙和 Wi-Fi 行为会根据当前模式区分处理。
 
 ### 休眠、唤醒与解锁
@@ -100,7 +93,7 @@
 
 - [`blueutil`](https://github.com/toy/blueutil)：蓝牙控制。
 - Python 与 [weather_landscape](https://github.com/lds133/weather_landscape)：天气景观图和异常天气预报数据。
-- README 中列出的应用：对应快捷键、休眠关闭或解锁启动行为。
+- `config.applications` 中配置的应用，以及休眠关闭或解锁启动所需的应用。
 
 ### 2. 安装配置
 
@@ -126,6 +119,7 @@ cp ~/.hammerspoon/config.example.lua ~/.hammerspoon/config.lua
 
 | 配置 | 用途 |
 | --- | --- |
+| `applications` | 应用名称、Bundle ID、组合键、按键和工作模式限制 |
 | `bluetooth.blueutilPath` | `blueutil` 可执行文件路径 |
 | `bluetooth.devices` | 休眠时需要断开的蓝牙设备名称和 ID |
 | `weather.*` | 城市、天气页面、Python、脚本目录、参数、预报 JSON 和深浅色图片路径 |
