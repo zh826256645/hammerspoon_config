@@ -21,15 +21,9 @@ return {
     wifi = {
         company = {
             ssid = "COMPANY-SSID",
-            configName = "company-profile",
-            displayName = "company-profile",
-            sourcePath = homeDir .. "/path/to/company-profile.yaml",
         },
         home = {
             ssid = "HOME-SSID",
-            configName = "home-profile",
-            displayName = "home-profile",
-            sourcePath = homeDir .. "/path/to/home-profile.yaml",
             volume = 50,
         },
     },

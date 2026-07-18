@@ -53,14 +53,11 @@
 - 解锁后取消尚未执行的休眠 / 唤醒任务，立即打开蓝牙与 Wi-Fi，并启动 Scroll Reverser。
 - 连续发生睡眠、唤醒或解锁事件时，过期的延迟任务会被跳过。
 
-### Wi-Fi、代理与系统声音
+### Wi-Fi 与系统声音
 
-- 监听公司和家庭 SSID，并抑制 10 秒内重复的同配置切换。
+- 监听公司和家庭 SSID。
 - 连接公司 Wi-Fi 时，仅在默认输出设备为 Mac 内置扬声器时静音。
 - 连接家庭 Wi-Fi 时，仅在默认输出设备为内置扬声器且当前静音时取消静音，并设置为 `config.wifi.home.volume`。
-- 检测到 `~/Library/Application Support/sparkle/profile.yaml` 时发送通知，提示在 Sparkle 中手动切换到对应配置。
-- 未检测到 Sparkle 配置时，从配置路径或常见 Mihomo / Clash 目录查找配置文件，必要时复制到运行目录，再调用 `PUT http://127.0.0.1:9090/configs` 完成切换。
-- 自动切换要求本地控制器监听 `127.0.0.1:9090`，并允许不带鉴权信息的 `/configs` 请求。
 - Wi-Fi 配置缺失时自动停用 SSID 监听并显示通知，不影响其他模块加载。
 
 ### 蓝牙
@@ -102,7 +99,6 @@
 按启用功能选装：
 
 - [`blueutil`](https://github.com/toy/blueutil)：蓝牙控制。
-- Sparkle（通知手动切换），或支持 `PUT /configs` 的 Mihomo / Clash（自动切换）：代理配置管理。
 - Python 与 [weather_landscape](https://github.com/lds133/weather_landscape)：天气景观图和异常天气预报数据。
 - README 中列出的应用：对应快捷键、休眠关闭或解锁启动行为。
 
@@ -133,8 +129,8 @@ cp ~/.hammerspoon/config.example.lua ~/.hammerspoon/config.lua
 | `bluetooth.blueutilPath` | `blueutil` 可执行文件路径 |
 | `bluetooth.devices` | 休眠时需要断开的蓝牙设备名称和 ID |
 | `weather.*` | 城市、天气页面、Python、脚本目录、参数、预报 JSON 和深浅色图片路径 |
-| `wifi.company` | 公司 SSID、代理配置名、显示名和可选源文件路径 |
-| `wifi.home` | 家庭 SSID、代理配置名、显示名、可选源文件路径和恢复音量 |
+| `wifi.company` | 公司 SSID |
+| `wifi.home` | 家庭 SSID 和恢复音量 |
 
 填写完成后，在 Hammerspoon 中执行 `Reload Config`。如需停用功能，以 [`init.lua`](./init.lua) 为入口，同时移除对应模块的加载、注册和启动调用；休眠监控依赖应用、蓝牙和 Wi-Fi 控制，需要一起调整。
 
@@ -147,7 +143,7 @@ cp ~/.hammerspoon/config.example.lua ~/.hammerspoon/config.lua
 | [`window`](./modules/window/windows.lua) | 窗口吸附、尺寸、跨屏移动和屏幕焦点 |
 | [`monitor`](./modules/monitor/monitor.lua) | 睡眠、唤醒、锁屏和解锁事件 |
 | [`bluetooth`](./modules/bluetooth/blueutils.lua) | 蓝牙开关和设备断开 |
-| [`wifi`](./modules/wifi/wifi.lua) | SSID 监听、代理配置和系统声音 |
+| [`wifi`](./modules/wifi/wifi.lua) | SSID 监听和系统声音 |
 | [`weather`](./modules/weather/weather.lua) | 天气菜单、景观图和异常天气提醒 |
 | [`pasteboard`](./modules/pasteboard/pasteboard.lua) | 复制文本清理 |
 | [`history`](./modules/pasteboard/history.lua) | 剪贴板历史 |
