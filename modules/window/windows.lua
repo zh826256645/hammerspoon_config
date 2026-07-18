@@ -58,6 +58,7 @@ local function moveAfterLeavingFullScreen(win, action)
         win:toggleFullScreen()
         timer.doAfter(fullScreenMoveDelay, function()
             action(win)
+            win:toggleFullScreen()
         end)
         return
     end
