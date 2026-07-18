@@ -156,4 +156,3 @@ cp ~/.hammerspoon/config.example.lua ~/.hammerspoon/config.lua
 
 - 功能是否启用以 [`init.lua`](./init.lua) 中的加载、注册和启动调用为准。
 - 修改后执行 `Reload Config`，检查 Hammerspoon Console 无新增错误，再验证受影响的快捷键或 watcher。
-- 项目治理和后续改动规则见[《Hammerspoon 配置治理方案》](./GOVERNANCE.md)。
