@@ -1,121 +1,163 @@
-# My hammerspoon config
+# Hammerspoon Config
 
-**Based on [hammerspoon-config](https://github.com/wangshub/hammerspoon-config)**
+个人 macOS 自动化配置，基于 [hammerspoon-config](https://github.com/wangshub/hammerspoon-config) 持续调整。本文只列出 [`init.lua`](./init.lua) 当前已加载和启动的功能；实际运行还取决于本机配置与外部依赖是否有效。
 
-## Modules
+## 当前功能
 
-[application](./modules/application/application.lua): 控制应用程序
-- 绑定 Finder 快捷键到 ⌘ + E
-- 绑定 Alacritty 快捷键到 ⌃ + ⌥ + T
-- 绑定 Chrome（Edge）快捷键到 ⌃ + ⌘ + G
-- 工作模式下绑定 VS Code 快捷键到 ⌃ + ⌘ + V
-- 绑定 Launchpad 快捷键到 ⌃ + ⌘ + L
-- 绑定 Notion 快捷键到 ⌃ + ⌘ + N
-- 绑定 Reeder 快捷键到 ⌃ + ⌘ + R
-- 绑定 Podcasts 快捷键到 ⌃ + ⌘ + P
-- 工作模式下绑定 Codex 快捷键到 ⌃ + ⌘ + Z
+### 窗口与多屏控制
 
-[computer_mode](./modules/computer_mode/computer_mode.lua): 管理电脑工作/娱乐模式
-- 使用 ⌃ + ⌥ + ⌘ + W 切换模式
-- 模式状态会在 Hammerspoon 重载后保留
-- 周一至周六 08:30–09:30 检查一次并切换到工作模式，18:10 后检查一次并切换到娱乐模式
-- 娱乐模式下关闭 macOS 触发角，切回工作模式时恢复原设置
-- 其他模块可通过 `onChange` 响应模式变化
+| 功能 | 快捷键 |
+| --- | --- |
+| 左 / 右 / 上 / 下半屏吸附 | `⌃⌥⌘ + 方向键` |
+| 左上 / 右下 / 右上 / 左下角吸附 | `⌃⌥⇧ + 方向键` |
+| 最大化或恢复原窗口尺寸 | `⌃⌥⌘ + M` |
+| 切换 macOS 全屏 | `⌃⌥⌘ + F` |
+| 窗口居中 | `⌃⌥⌘ + C` |
+| 移动窗口到前 / 后屏幕 | `⌥⇧ + ← / →` |
+| 移动窗口到屏幕 1 / 2 / 3 并最大化 | `⌥⇧ + 1 / 2 / 3` |
+| 切换应用窗口 | `⌥⇧ + H` |
+| 显示窗口提示（hints） | `⌥⇧ + /` |
+| 聚焦前 / 后屏幕的窗口并移动光标 | `⌃⌥ + ← / →` |
+| 仅将光标移动到下一个屏幕 | `⌘ + 反引号` |
 
-[blueutils](./modules/bluetooth/blueutils.lua): 控制蓝牙
-- 断开 `config.lua` 中配置的蓝牙设备
-- 开关蓝牙
-- 屏幕休眠后断开蓝牙设备
+全屏窗口跨屏时会先退出全屏，完成移动后恢复全屏状态。编号切屏目前支持屏幕 1～3。
 
-[helps](./modules/help/helps.lua): 快捷键帮助
-- 使用 ⌃ + ⌥ + ⌘ + / 显示帮助菜单
+### 应用快捷键
 
-[history](./modules/pasteboard/history.lua): 粘贴板历史记录
-- ⌘ + ⇧ + V 弹出粘贴板历史菜单
-- 默认保存最近 100 条文本记录，Option 选择可直接输入
+| 应用 | 快捷键 | 说明 |
+| --- | --- | --- |
+| Finder | `⌘ + E` | 始终可用 |
+| Alacritty | `⌃⌥ + T` | 始终可用 |
+| Microsoft Edge | `⌃⌘ + G` | 始终可用 |
+| VS Code | `⌃⌘ + V` | 仅工作模式可用 |
+| Launchpad | `⌃⌘ + L` | 始终可用 |
+| Notion | `⌃⌘ + N` | 始终可用 |
+| Reeder | `⌃⌘ + R` | 始终可用 |
+| Podcasts | `⌃⌘ + P` | 始终可用 |
+| Codex | `⌃⌘ + Z` | 仅工作模式可用 |
 
-[pasteboard](./modules/pasteboard/pasteboard.lua): 粘贴板数据处理
-- 去除复制的字符串左右两边的空格
+### 工作 / 娱乐模式
 
-[monitor](./modules/monitor/monitor.lua): 监控系统状态，在不同状态下进行不同处理
-- 屏幕休眠 15 秒后：关闭音流并断开蓝牙设备；娱乐模式下同时关闭微信、企业微信、蓝牙与 Wi-Fi
-- 屏幕唤醒 5 秒后：预打开蓝牙与 Wi-Fi
-- 解锁后：立即打开蓝牙与 Wi-Fi，打开 ScrollReverser
+- 使用 `⌃⌥⌘ + W` 手动切换，当前模式保存在 `hs.settings` 中，重载后继续保留。
+- 周一至周六每分钟检查一次：08:30（含）～09:30（含）当天首次检查切换到工作模式，18:10（含）后当天首次检查切换到娱乐模式；错过上午时间窗口后当天不会自动进入工作模式，周日不自动切换。
+- 当天是否已执行自动切换同样保存在 `hs.settings` 中，重载配置不会重复执行。
+- 娱乐模式会保存并关闭四个 macOS 触发角，回到工作模式时恢复原设置。
+- VS Code 和 Codex 快捷键只在工作模式启用。
+- 屏幕休眠后的应用、蓝牙和 Wi-Fi 行为会根据当前模式区分处理。
 
-[weather](./modules/weather/weather.lua): 天气组件
-- 使用 [中国气象台](http://www.nmc.cn) 接口获取实时天气和详细预报
-- 通过 Python 脚本处理 OpenWeatherMap 预报数据，生成天气景观图
-- 天气图片生成依赖 [weather_landscape](https://github.com/lds133/weather_landscape) 项目
-- 异常天气提醒（雷暴、雾、霾、沙尘等）
-- 城市、本地 Python 和图片路径从 `config.lua` 读取
+### 休眠、唤醒与解锁
 
-[windows](./modules/windows/windows.lua): 绑定窗口控制的快捷键
-- 左吸附 ^ + ⌥ + ⌘ + ←
-- 右吸附 ^ + ⌥ + ⌘ + →
-- 上吸附 ^ + ⌥ + ⌘ + ↑
-- 下吸附 ^ + ⌥ + ⌘ + ↓
-- 左上角吸附 ^ + ⌥ + ⇧ + ←
-- 右下角吸附 ^ + ⌥ + ⇧ + →
-- 右上角吸附 ^ + ⌥ + ⇧ + ↑
-- 左下角吸附 ^ + ⌥ + ⇧ + ↓
-- 到上个屏幕 ⌥ + ⇧ + ←
-- 到下个屏幕 ⌥ + ⇧ + →
-- 移动窗口到屏幕 1/2/3 ⌥ + ⇧ + 1/2/3
-- 最大化 ^ + ⌥ + ⌘ + M
-- 全屏幕 ^ + ⌥ + ⌘ + F
-- 屏幕居中 ^ + ⌥ + ⌘ + C
-- 切换应用窗口 ⌥ + ⇧ + H
-- 窗口提示（hints）⌥ + ⇧ + /
-- 窗口焦点到上个屏幕 ⌃ + ⌥ + ←
-- 窗口焦点到下个屏幕 ⌃ + ⌥ + →
-- 移动光标到下个屏幕 ⌘ + `
+- 屏幕持续休眠 15 秒后：关闭“音流”App，并断开 `config.lua` 中配置的蓝牙设备。
+- 娱乐模式下还会关闭微信、企业微信，并关闭蓝牙与 Wi-Fi；工作模式保留微信、企业微信以及蓝牙 / Wi-Fi 电源，但仍会断开配置的蓝牙设备。
+- 屏幕唤醒 5 秒后，如果没有再次休眠，预先打开蓝牙与 Wi-Fi。
+- 解锁后取消尚未执行的休眠 / 唤醒任务，立即打开蓝牙与 Wi-Fi，并启动 Scroll Reverser。
+- 连续发生睡眠、唤醒或解锁事件时，过期的延迟任务会被跳过。
 
-[wifi](./modules/wifi/wifi.lua): Wi-Fi 配置自动切换
-- 根据 `config.lua` 中的公司/家庭 SSID 自动切换代理配置与系统音量
-- 开关 Wi-Fi
+### Wi-Fi、代理与系统声音
 
-[input_method](./modules/input_method/input_method.lua): 输入法提示
-- 切换输入法时显示当前输入法名称（ABC / 中文 / 鼠须管 / 微信输入法）
+- 监听公司和家庭 SSID，并抑制 10 秒内重复的同配置切换。
+- 连接公司 Wi-Fi 时，仅在默认输出设备为 Mac 内置扬声器时静音。
+- 连接家庭 Wi-Fi 时，仅在默认输出设备为内置扬声器且当前静音时取消静音，并设置为 `config.wifi.home.volume`。
+- 检测到 `~/Library/Application Support/sparkle/profile.yaml` 时发送通知，提示在 Sparkle 中手动切换到对应配置。
+- 未检测到 Sparkle 配置时，从配置路径或常见 Mihomo / Clash 目录查找配置文件，必要时复制到运行目录，再调用 `PUT http://127.0.0.1:9090/configs` 完成切换。
+- 自动切换要求本地控制器监听 `127.0.0.1:9090`，并允许不带鉴权信息的 `/configs` 请求。
+- Wi-Fi 配置缺失时自动停用 SSID 监听并显示通知，不影响其他模块加载。
 
-[hotkey](./modules/shortcuts/hotkey.lua): 定义快捷键组合
+### 蓝牙
 
-[utils](./modules/utils/utils.lua): 工具函数（日期格式化、打印 Table、Sleep）
-[stringUtils](./modules/utils/stringUtils.lua): 字符串工具（split、strip、lstrip、rstrip）
+- 通过 `blueutil` 开关蓝牙。
+- 屏幕休眠时检查并断开 `config.bluetooth.devices` 中仍处于连接状态的设备。
+- `blueutil` 路径或设备配置无效时停用蓝牙控制，并在 Hammerspoon Console 中说明原因。
 
-## Use
+### 天气菜单
 
-如果存在 `~/.hammerspoon/` 文件夹，先进行备份、移除
+- 启动时立即更新，之后每 10 分钟从[中国气象台](http://www.nmc.cn)获取实时天气和详细预报。
+- 菜单栏显示天气、温度和更新时间；点击当天信息可打开配置的天气页面。
+- 异步调用本地 Python 脚本生成天气景观图，并根据系统深色 / 浅色模式选用对应图片。
+- 从预报 JSON 中检查未来 3 小时的雷暴、雨雪、雾、霾、沙尘等异常天气，并发送中文提醒；所有异常天气共用一个 3 小时冷却时间，冷却结束后仍有异常预报时可以再次提醒。
+- 天气配置无效时仅停用天气组件，不阻止其他功能加载。
 
-```shell script
-mv ~/.hammerspoon/ ~/.hammerspoon_back_up/
+天气图片生成依赖 [weather_landscape](https://github.com/lds133/weather_landscape)。
+
+### 剪贴板
+
+- 自动去除新复制文本首尾的空白，并显示一次“复制”提示。
+- 使用 `⌘⇧ + V` 打开最近 100 条文本历史；记录保存在 `hs.settings` 中，忽略空文本和连续重复内容。
+- 普通选择会把内容放回剪贴板；按住 `⌥` 选择会直接输入文本，不改写当前剪贴板。
+- 菜单底部可清空剪贴板及历史记录。
+
+### 输入法与快捷键帮助
+
+- 切换输入法时提示当前输入法名称，支持 ABC、中文、鼠须管和微信输入法。
+- 使用 `⌃⌥⌘ + /` 在鼠标位置打开快捷键帮助菜单。
+
+## 安装
+
+### 1. 安装依赖
+
+必需：
+
+- [Hammerspoon](https://www.hammerspoon.org/)，并授予辅助功能权限；如需接收天气、网络和蓝牙通知，还需允许通知权限。
+
+按启用功能选装：
+
+- [`blueutil`](https://github.com/toy/blueutil)：蓝牙控制。
+- Sparkle（通知手动切换），或支持 `PUT /configs` 的 Mihomo / Clash（自动切换）：代理配置管理。
+- Python 与 [weather_landscape](https://github.com/lds133/weather_landscape)：天气景观图和异常天气预报数据。
+- README 中列出的应用：对应快捷键、休眠关闭或解锁启动行为。
+
+### 2. 安装配置
+
+如果 `~/.hammerspoon/` 已存在，先备份：
+
+```shell
+mv ~/.hammerspoon ~/.hammerspoon_back_up
 ```
 
-拉取项目到 `~/.hammerspoon/` 下
+克隆仓库：
 
-```shell script
-git clone https://github.com/zh826256645/hammerspoon_config.git ~/.hammerspoon/
-
+```shell
+git clone https://github.com/zh826256645/hammerspoon_config.git ~/.hammerspoon
 ```
 
-复制配置模板并填写本机值：
+复制本机配置模板：
 
-```shell script
+```shell
 cp ~/.hammerspoon/config.example.lua ~/.hammerspoon/config.lua
 ```
 
-`config.lua` 已加入 `.gitignore`，用于保存 Wi-Fi、蓝牙设备和天气脚本等本机配置，不会提交到公开仓库。
+`config.lua` 已加入 `.gitignore`，用于保存以下本机参数，不应写入密码或令牌：
 
-外部依赖：
+| 配置 | 用途 |
+| --- | --- |
+| `bluetooth.blueutilPath` | `blueutil` 可执行文件路径 |
+| `bluetooth.devices` | 休眠时需要断开的蓝牙设备名称和 ID |
+| `weather.*` | 城市、天气页面、Python、脚本目录、参数、预报 JSON 和深浅色图片路径 |
+| `wifi.company` | 公司 SSID、代理配置名、显示名和可选源文件路径 |
+| `wifi.home` | 家庭 SSID、代理配置名、显示名、可选源文件路径和恢复音量 |
 
-- Hammerspoon
-- `blueutil`（蓝牙控制）
-- Sparkle 或支持 `PUT /configs` 的 Mihomo/Clash（代理配置切换）
-- Python 与 `weather_landscape`（天气景观图，可选）
+填写完成后，在 Hammerspoon 中执行 `Reload Config`。如需停用功能，以 [`init.lua`](./init.lua) 为入口，同时移除对应模块的加载、注册和启动调用；休眠监控依赖应用、蓝牙和 Wi-Fi 控制，需要一起调整。
 
-让 hammerspoon `Reload Config` 进行配置文件重载
+## 模块结构
 
-如果不需要某些功能，直接在 [init.lua](init.lua) 中进行注释
+| 模块 | 职责 |
+| --- | --- |
+| [`application`](./modules/application/application.lua) | 应用快捷键、打开和关闭应用 |
+| [`computer_mode`](./modules/computer_mode/computer_mode.lua) | 工作 / 娱乐模式、定时切换和触发角 |
+| [`window`](./modules/window/windows.lua) | 窗口吸附、尺寸、跨屏移动和屏幕焦点 |
+| [`monitor`](./modules/monitor/monitor.lua) | 睡眠、唤醒、锁屏和解锁事件 |
+| [`bluetooth`](./modules/bluetooth/blueutils.lua) | 蓝牙开关和设备断开 |
+| [`wifi`](./modules/wifi/wifi.lua) | SSID 监听、代理配置和系统声音 |
+| [`weather`](./modules/weather/weather.lua) | 天气菜单、景观图和异常天气提醒 |
+| [`pasteboard`](./modules/pasteboard/pasteboard.lua) | 复制文本清理 |
+| [`history`](./modules/pasteboard/history.lua) | 剪贴板历史 |
+| [`input_method`](./modules/input_method/input_method.lua) | 输入法切换提示 |
+| [`help`](./modules/help/helps.lua) | 快捷键帮助菜单 |
+| [`hotkey`](./modules/shortcuts/hotkey.lua) | 公共快捷键组合 |
+| [`utils`](./modules/utils/utils.lua)、[`stringUtils`](./modules/utils/stringUtils.lua) | 公共工具函数 |
 
-## Governance
+## 修改与验证
 
-项目整理与后续改动规则见 [Hammerspoon 配置治理方案](./GOVERNANCE.md)。
+- 功能是否启用以 [`init.lua`](./init.lua) 中的加载、注册和启动调用为准。
+- 修改后执行 `Reload Config`，检查 Hammerspoon Console 无新增错误，再验证受影响的快捷键或 watcher。
+- 项目治理和后续改动规则见[《Hammerspoon 配置治理方案》](./GOVERNANCE.md)。
