@@ -27,6 +27,19 @@
 - 应用快捷键从 `config.applications` 读取，新增应用只需配置 `name`、`bundleId`、`modifiers` 和 `key` 后重载 Hammerspoon。
 - `modifiers` 支持 `cmd`、`ctrl`、`alt`、`shift`；设置 `workModeOnly = true` 后只在工作模式启用。
 - 快捷键帮助菜单会从同一配置自动生成，不需要同步修改代码或文档。
+
+`config.example.lua` 当前配置的示例快捷键：
+
+| 应用 | 快捷键 | 启用范围 |
+| --- | --- | --- |
+| Finder | `⌘ + E` | 始终可用 |
+| Alacritty | `⌃⌥ + T` | 始终可用 |
+| Edge | `⌃⌘ + G` | 始终可用 |
+| VS Code | `⌃⌘ + V` | 工作模式 |
+| Podcasts | `⌃⌘ + P` | 始终可用 |
+| 音流 | `⌃⌘ + M` | 始终可用 |
+| Codex | `⌃⌘ + Z` | 工作模式 |
+
 - 完整配置示例见 [`config.example.lua`](./config.example.lua)。
 
 ### 工作 / 娱乐模式
