@@ -21,7 +21,7 @@ local function closeAfter(sec)
 
     pendingCloseTimer = stopTimer(pendingCloseTimer)
 
-    print(sec .. " 秒后如果仍未解锁，将关闭 音流并断开蓝牙设备（娱乐模式同时关闭微信、企业微信、蓝牙与 Wi-Fi）")
+    print(sec .. " 秒后如果仍未解锁，将关闭配置的应用并断开蓝牙设备（娱乐模式同时关闭微信、企业微信、蓝牙与 Wi-Fi）")
 
     pendingCloseTimer = hs.timer.doAfter(sec, function()
         pendingCloseTimer = nil
@@ -33,10 +33,9 @@ local function closeAfter(sec)
 
         if (nowStatus ~= hs.caffeinate.watcher.screensDidUnlock) then
             if not ComputerMode:isWorkMode() then
-                CloseApplication(TheWeChatBundleID, "微信")
-                CloseApplication(TheWeWorkBundleID, "企业微信")
+                CloseEntertainmentSleepApplications()
             end
-            CloseApplication(TheYinLiuBundleID, "音流")
+            CloseSleepApplications()
             bluetoothControl.disconnectConfigured()
 
             if not ComputerMode:isWorkMode() then
@@ -114,7 +113,7 @@ local function caffeinateCallback(eventType)
         print("解锁后立即打开蓝牙与 Wi-Fi")
         bluetoothControl.switch(1)
         wifiControl.switch(1)
-        OpenApplication(TheScrollReverserID)
+        OpenUnlockApplications()
     else
         print("忽略未处理的 caffeinate 事件: " .. tostring(eventType))
     end

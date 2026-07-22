@@ -1,31 +1,42 @@
 -- 处理应用
 
-local applicationShortcuts = require("config").applications
-
-TheWeChatBundleID = "com.tencent.xinWeChat"
-TheWeWorkBundleID = "com.tencent.WeWorkMac"
-TheScrollReverserID = "com.pilotmoon.scroll-reverser"
-TheYinLiuBundleID = "cn.aqzscn.streamMusic"
+local applications = require("config").applications
 
 local workModeHotkeys = {}
+local sleepCloseApplications = {}
+local entertainmentSleepCloseApplications = {}
+local unlockOpenApplications = {}
 local validModifiers = { cmd = true, ctrl = true, alt = true, shift = true }
 
-if type(applicationShortcuts) ~= "table" then
-    print("应用快捷键已停用: 缺少 config.applications 配置")
-    applicationShortcuts = {}
+if type(applications) ~= "table" then
+    print("应用功能已停用: 缺少 config.applications 配置")
+    applications = {}
 end
 
-local function isValidApplicationShortcut(shortcut)
-    if type(shortcut) ~= "table"
-        or type(shortcut.name) ~= "string" or shortcut.name == ""
-        or type(shortcut.bundleId) ~= "string" or shortcut.bundleId == ""
-        or type(shortcut.modifiers) ~= "table"
-        or type(shortcut.key) ~= "string" or shortcut.key == ""
-        or (shortcut.workModeOnly ~= nil and type(shortcut.workModeOnly) ~= "boolean") then
+local function hasShortcut(application)
+    return application.modifiers ~= nil or application.key ~= nil
+end
+
+local function isValidApplication(application)
+    if type(application) ~= "table"
+        or type(application.name) ~= "string" or application.name == ""
+        or type(application.bundleId) ~= "string" or application.bundleId == ""
+        or (application.workModeOnly ~= nil and type(application.workModeOnly) ~= "boolean")
+        or (application.closeOnSleep ~= nil and type(application.closeOnSleep) ~= "boolean")
+        or (application.closeOnSleepInEntertainmentMode ~= nil and type(application.closeOnSleepInEntertainmentMode) ~= "boolean")
+        or (application.openOnUnlock ~= nil and type(application.openOnUnlock) ~= "boolean") then
         return false
     end
 
-    for _, modifier in ipairs(shortcut.modifiers) do
+    if not hasShortcut(application) then
+        return application.workModeOnly ~= true
+    end
+
+    if type(application.modifiers) ~= "table" or type(application.key) ~= "string" or application.key == "" then
+        return false
+    end
+
+    for _, modifier in ipairs(application.modifiers) do
         if not validModifiers[modifier] then
             return false
         end
@@ -34,12 +45,24 @@ local function isValidApplicationShortcut(shortcut)
     return true
 end
 
-assert(isValidApplicationShortcut({
+assert(isValidApplication({
     name = "App",
     bundleId = "com.example.app",
     modifiers = { "cmd" },
     key = "A",
-}) and not isValidApplicationShortcut({}))
+    closeOnSleep = true,
+}) and isValidApplication({ name = "App", bundleId = "com.example.app", openOnUnlock = true })
+    and not isValidApplication({}) and not isValidApplication({
+    name = "App",
+    bundleId = "com.example.app",
+    modifiers = { "cmd" },
+    key = "A",
+    closeOnSleep = "true",
+}) and not isValidApplication({
+    name = "App",
+    bundleId = "com.example.app",
+    workModeOnly = true,
+}))
 
 local function SetWorkModeHotkeysEnabled(enabled)
     for _, hotkey in ipairs(workModeHotkeys) do
@@ -63,6 +86,18 @@ function CloseApplication(bundleID, appName)
     end
 end
 
+function CloseSleepApplications()
+    for _, application in ipairs(sleepCloseApplications) do
+        CloseApplication(application.bundleId, application.name)
+    end
+end
+
+function CloseEntertainmentSleepApplications()
+    for _, application in ipairs(entertainmentSleepCloseApplications) do
+        CloseApplication(application.bundleId, application.name)
+    end
+end
+
 -- 开启程序
 function OpenApplication(bundleID)
     local application = hs.application.applicationsForBundleID(bundleID)
@@ -74,24 +109,41 @@ function OpenApplication(bundleID)
     end
 end
 
+function OpenUnlockApplications()
+    for _, application in ipairs(unlockOpenApplications) do
+        OpenApplication(application.bundleId)
+    end
+end
+
 -- 绑定程序
 function BindApplicationShortcut(computerMode)
     local validShortcuts = {}
 
-    for index, shortcut in ipairs(applicationShortcuts) do
-        if not isValidApplicationShortcut(shortcut) then
-            print("忽略无效的应用快捷键配置: " .. tostring(index))
+    for index, application in ipairs(applications) do
+        if not isValidApplication(application) then
+            print("忽略无效的应用配置: " .. tostring(index))
         else
-            table.insert(validShortcuts, shortcut)
-            local hotkey = hs.hotkey.bind(shortcut.modifiers, shortcut.key, function()
-                hs.application.open(shortcut.bundleId)
-                hs.timer.doAfter(0.3, function()
-                    hs.alert.show(shortcut.name, 0.8)
+            if application.closeOnSleep then
+                table.insert(sleepCloseApplications, application)
+            end
+            if application.closeOnSleepInEntertainmentMode then
+                table.insert(entertainmentSleepCloseApplications, application)
+            end
+            if application.openOnUnlock then
+                table.insert(unlockOpenApplications, application)
+            end
+            if hasShortcut(application) then
+                table.insert(validShortcuts, application)
+                local hotkey = hs.hotkey.bind(application.modifiers, application.key, function()
+                    hs.application.open(application.bundleId)
+                    hs.timer.doAfter(0.3, function()
+                        hs.alert.show(application.name, 0.8)
+                    end)
                 end)
-            end)
 
-            if shortcut.workModeOnly then
-                table.insert(workModeHotkeys, hotkey)
+                if application.workModeOnly then
+                    table.insert(workModeHotkeys, hotkey)
+                end
             end
         end
     end

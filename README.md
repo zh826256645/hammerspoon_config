@@ -22,11 +22,12 @@
 
 全屏窗口跨屏时会先退出全屏，完成移动后恢复全屏状态。编号切屏目前支持屏幕 1～3。
 
-### 应用快捷键
+### 应用配置与快捷键
 
-- 应用快捷键从 `config.applications` 读取，新增应用只需配置 `name`、`bundleId`、`modifiers` 和 `key` 后重载 Hammerspoon。
-- `modifiers` 支持 `cmd`、`ctrl`、`alt`、`shift`；设置 `workModeOnly = true` 后只在工作模式启用。
-- 快捷键帮助菜单会从同一配置自动生成，不需要同步修改代码或文档。
+- 所有应用统一从 `config.applications` 读取；每项都需要 `name` 和 `bundleId`。
+- 同时设置 `modifiers` 和 `key` 才绑定快捷键；`modifiers` 支持 `cmd`、`ctrl`、`alt`、`shift`。设置 `workModeOnly = true` 后，该快捷键只在工作模式启用。
+- 监控动作也是应用项的可选字段：`closeOnSleep = true` 会在屏幕休眠 15 秒后关闭，`closeOnSleepInEntertainmentMode = true` 仅在娱乐模式关闭，`openOnUnlock = true` 会在解锁后打开。
+- 快捷键帮助菜单只从配置了快捷键的应用自动生成，不需要同步修改代码或文档。
 
 `config.example.lua` 当前配置的示例快捷键：
 
@@ -53,10 +54,10 @@
 
 ### 休眠、唤醒与解锁
 
-- 屏幕持续休眠 15 秒后：关闭“音流”App，并断开 `config.lua` 中配置的蓝牙设备。
-- 娱乐模式下还会关闭微信、企业微信，并关闭蓝牙与 Wi-Fi；工作模式保留微信、企业微信以及蓝牙 / Wi-Fi 电源，但仍会断开配置的蓝牙设备。
+- 屏幕持续休眠 15 秒后：关闭 `config.applications` 中设置了 `closeOnSleep = true` 的应用（当前为 Podcasts、音流），并断开 `config.lua` 中配置的蓝牙设备。
+- 娱乐模式下还会关闭设置了 `closeOnSleepInEntertainmentMode = true` 的应用（当前为微信、企业微信），并关闭蓝牙与 Wi-Fi；工作模式保留这些应用以及蓝牙 / Wi-Fi 电源，但仍会断开配置的蓝牙设备。
 - 屏幕唤醒 5 秒后，如果没有再次休眠，预先打开蓝牙与 Wi-Fi。
-- 解锁后取消尚未执行的休眠 / 唤醒任务，立即打开蓝牙与 Wi-Fi，并启动 Scroll Reverser。
+- 解锁后取消尚未执行的休眠 / 唤醒任务，立即打开蓝牙与 Wi-Fi，并启动设置了 `openOnUnlock = true` 的应用（当前为 Scroll Reverser）。
 - 连续发生睡眠、唤醒或解锁事件时，过期的延迟任务会被跳过。
 
 ### Wi-Fi 与系统声音
@@ -132,7 +133,7 @@ cp ~/.hammerspoon/config.example.lua ~/.hammerspoon/config.lua
 
 | 配置 | 用途 |
 | --- | --- |
-| `applications` | 应用名称、Bundle ID、组合键、按键和工作模式限制 |
+| `applications` | 统一应用注册表：名称、Bundle ID、可选快捷键 / 工作模式限制，以及睡眠、解锁监控动作 |
 | `bluetooth.blueutilPath` | `blueutil` 可执行文件路径 |
 | `bluetooth.devices` | 休眠时需要断开的蓝牙设备名称和 ID |
 | `weather.*` | 城市、天气页面、Python、脚本目录、参数、预报 JSON 和深浅色图片路径 |
@@ -145,7 +146,7 @@ cp ~/.hammerspoon/config.example.lua ~/.hammerspoon/config.lua
 
 | 模块 | 职责 |
 | --- | --- |
-| [`application`](./modules/application/application.lua) | 应用快捷键、打开和关闭应用 |
+| [`application`](./modules/application/application.lua) | 统一应用注册表、快捷键以及睡眠 / 解锁动作 |
 | [`computer_mode`](./modules/computer_mode/computer_mode.lua) | 工作 / 娱乐模式、定时切换和触发角 |
 | [`window`](./modules/window/windows.lua) | 窗口吸附、尺寸、跨屏移动和屏幕焦点 |
 | [`monitor`](./modules/monitor/monitor.lua) | 睡眠、唤醒、锁屏和解锁事件 |
