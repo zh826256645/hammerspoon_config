@@ -90,6 +90,11 @@ function Wifi.registerWatcher()
     return hs.wifi.watcher.new(ssidChangedCallback)
 end
 
+function Wifi.isPoweredOn()
+    local details = hs.wifi.interfaceDetails()
+    return details ~= nil and details.power == true
+end
+
 -- 开关 Wi-Fi
 function Wifi.switch(state)
     if state == 1 then
