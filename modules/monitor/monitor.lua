@@ -15,13 +15,19 @@ local function stopTimer(timer)
     return nil
 end
 
+local function shouldCloseAfterScreenSleep(isWorkMode)
+    return not isWorkMode
+end
+
+assert(not shouldCloseAfterScreenSleep(true) and shouldCloseAfterScreenSleep(false))
+
 -- 多少秒后关闭程序
 local function closeAfter(sec)
     local eventId = monitorEventId
 
     pendingCloseTimer = stopTimer(pendingCloseTimer)
 
-    print(sec .. " 秒后如果仍未解锁，将关闭配置的应用并断开蓝牙设备（娱乐模式同时关闭微信、企业微信、蓝牙与 Wi-Fi）")
+    print(sec .. " 秒后如果仍未解锁，将执行娱乐模式休眠清理")
 
     pendingCloseTimer = hs.timer.doAfter(sec, function()
         pendingCloseTimer = nil
@@ -32,17 +38,12 @@ local function closeAfter(sec)
         end
 
         if (nowStatus ~= hs.caffeinate.watcher.screensDidUnlock) then
-            if not ComputerMode:isWorkMode() then
-                CloseEntertainmentSleepApplications()
-            end
+            CloseEntertainmentSleepApplications()
             CloseSleepApplications()
             bluetoothControl.disconnectConfigured()
-
-            if not ComputerMode:isWorkMode() then
-                Sleep(2)
-                bluetoothControl.switch(0)
-                wifiControl.switch(0)
-            end
+            Sleep(2)
+            bluetoothControl.switch(0)
+            wifiControl.switch(0)
         else
             print("取消睡眠关闭任务")
         end
@@ -83,7 +84,12 @@ local function caffeinateCallback(eventType)
         nowStatus = eventType
         print("睡眠")
         pendingOpenTimer = stopTimer(pendingOpenTimer)
-        closeAfter(15)
+        pendingCloseTimer = stopTimer(pendingCloseTimer)
+        if shouldCloseAfterScreenSleep(ComputerMode:isWorkMode()) then
+            closeAfter(15)
+        else
+            print("工作模式不执行休眠清理")
+        end
     elseif (eventType == hs.caffeinate.watcher.screensDidWake) then
         monitorEventId = monitorEventId + 1
         nowStatus = eventType

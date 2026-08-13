@@ -99,6 +99,10 @@ local function updateHotCornersForMode(mode)
     end
 end
 
+local function updateIdleSleepForMode(mode)
+    hs.caffeinate.set("systemIdle", mode == WorkMode)
+end
+
 local function scheduledMode(now)
     local weekday = tonumber(os.date("%w", now))
     local minutes = tonumber(os.date("%H", now)) * 60 + tonumber(os.date("%M", now))
@@ -161,6 +165,7 @@ function RegisterComputerMode()
     end
 
     controller:onChange(updateHotCornersForMode)
+    controller:onChange(updateIdleSleepForMode)
 
     hs.hotkey.bind(CmdCtrlAltHyper, 'W', function()
         controller:toggle()
