@@ -30,10 +30,18 @@ function BindWindowSnap()
     }
     for _, value in ipairs(settings) do
         hotkey.bind(value[2], value[3], function()
-            if window.focusedWindow() then
-                window.focusedWindow():moveToUnit(value[4])
-            else
+            local win = window.focusedWindow()
+            if not win then
                 alert.show("No active window")
+                return
+            end
+            if win:isFullScreen() then
+                win:toggleFullScreen()
+                timer.doAfter(0.8, function()
+                    win:moveToUnit(value[4])
+                end)
+            else
+                win:moveToUnit(value[4])
             end
         end)
     end
