@@ -164,7 +164,6 @@ function RegisterComputerMode()
         self:setMode(self:isWorkMode() and EntertainmentMode or WorkMode)
     end
 
-    controller:onChange(updateHotCornersForMode)
     controller:onChange(updateIdleSleepForMode)
 
     hs.hotkey.bind(CmdCtrlAltHyper, 'W', function()
