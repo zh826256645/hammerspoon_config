@@ -11,8 +11,8 @@ return {
         { name = "音流", bundleId = "cn.aqzscn.streamMusic", modifiers = { "cmd", "ctrl" }, key = "M", closeOnSleep = true },
         { name = "Codex", bundleId = "com.openai.codex", modifiers = { "cmd", "ctrl" }, key = "Z", workModeOnly = true },
         { name = "微信", bundleId = "com.tencent.xinWeChat", modifiers = { "cmd", "ctrl" }, key = "X", closeOnSleepInEntertainmentMode = true },
-        { name = "企业微信", bundleId = "com.tencent.WeWorkMac", modifiers = { "cmd", "ctrl" }, key = "W", closeOnSleepInEntertainmentMode = true },
-        { name = "飞书", bundleId = "com.bytedance.macos.feishu", modifiers = { "cmd", "ctrl" }, key = "E" },
+        { name = "企业微信", bundleId = "com.tencent.WeWorkMac", modifiers = { "cmd", "ctrl" }, key = "W", workModeOnly = true, closeOnSleepInEntertainmentMode = true },
+        { name = "飞书", bundleId = "com.bytedance.macos.feishu", modifiers = { "cmd", "ctrl" }, key = "E", workModeOnly = true },
         { name = "Scroll Reverser", bundleId = "com.pilotmoon.scroll-reverser", openOnUnlock = true },
     },
     bluetooth = {
