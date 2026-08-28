@@ -116,8 +116,10 @@ local function caffeinateCallback(eventType)
         -- blueUtils:connectBluetooth(MyBlueDeviceID) --
         -- bluetoothSwitch(1)
         -- GetWeather()
-        print("解锁后立即打开蓝牙，并在需要时打开 Wi-Fi")
-        bluetoothControl.switch(1)
+        print("解锁后检查并按需打开蓝牙与 Wi-Fi")
+        if not bluetoothControl.isPoweredOn() then
+            bluetoothControl.switch(1)
+        end
         if not wifiControl.isPoweredOn() then
             wifiControl.switch(1)
         end
@@ -130,6 +132,7 @@ end
 -- 注册监控
 function RegisterMonitor(bluetooth, wifi)
     assert(type(bluetooth) == "table" and type(bluetooth.switch) == "function"
+        and type(bluetooth.isPoweredOn) == "function"
         and type(bluetooth.disconnectConfigured) == "function", "monitor 缺少蓝牙控制函数")
     assert(type(wifi) == "table" and type(wifi.switch) == "function"
         and type(wifi.isPoweredOn) == "function", "monitor 缺少 Wi-Fi 控制函数")

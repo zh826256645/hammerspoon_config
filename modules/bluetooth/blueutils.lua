@@ -36,6 +36,16 @@ local function isConnectedBluetooth(DeviceID)
     return tonumber(result)
 end
 
+function Bluetooth.isPoweredOn()
+    if configError ~= nil then
+        return false
+    end
+
+    local cmd = blueutilPath .. " --power"
+    local _, result = hs.osascript.applescript(string.format('do shell script "%s"', cmd))
+    return tonumber(result) == 1
+end
+
 -- 开关蓝牙
 function Bluetooth.switch(state)
     if configError ~= nil then
@@ -51,8 +61,7 @@ function Bluetooth.switch(state)
     end
 
     -- 判断蓝牙状态
-    local cmd = blueutilPath .. " --power"
-    local _, result = hs.osascript.applescript(string.format('do shell script "%s"', cmd))
+    local result = Bluetooth.isPoweredOn() and 1 or 0
 
     if tonumber(result) ~= state then
         local cmdSetState = blueutilPath .. " --power " .. state
