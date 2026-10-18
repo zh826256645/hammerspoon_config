@@ -15,6 +15,7 @@ require "modules/monitor/monitor"
 require "modules/pasteboard/pasteboard"
 require "modules/pasteboard/history"
 local WifiControl = require "modules/wifi/wifi"
+local TimeMachineControl = require "modules/time_machine/time_machine"
 require "modules/input_method/input_method"
 require "modules/help/helps"
 
@@ -57,6 +58,20 @@ ClipboardHistory:start()
 WifiWatcher = WifiControl.registerWatcher()
 if WifiWatcher ~= nil then
     WifiWatcher:start()
+end
+
+-- 注册 Time Machine 备份后安全弹出
+TimeMachineBackup = TimeMachineControl.register()
+if TimeMachineBackup ~= nil then
+    TimeMachineBackup:start()
+end
+
+local previousShutdown = hs.shutdownCallback
+hs.shutdownCallback = function()
+    if TimeMachineBackup ~= nil then
+        TimeMachineBackup:stop()
+    end
+    if previousShutdown then previousShutdown() end
 end
 
 -- 注册帮助快捷键

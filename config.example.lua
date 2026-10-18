@@ -1,6 +1,13 @@
 local homeDir = os.getenv("HOME")
 
 return {
+    timeMachine = {
+        enabled = false,
+        destinationId = "TIME-MACHINE-DESTINATION-ID", -- tmutil destinationinfo
+        volumeUUID = "BACKUP-VOLUME-UUID", -- diskutil info <备份卷> 的 Volume UUID
+        pythonPath = "/usr/bin/python3",
+        pollInterval = 30,
+    },
     applications = {
         -- modifiers/key 为可选快捷键；其余布尔字段为可选监控动作。
         { name = "Finder", bundleId = "com.apple.finder", modifiers = { "cmd" }, key = "E" },

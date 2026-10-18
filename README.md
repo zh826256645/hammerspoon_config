@@ -87,6 +87,16 @@
 
 天气图片生成依赖 [weather_landscape](https://github.com/lds133/weather_landscape)。
 
+### Time Machine 备份后安全弹出
+
+- 设置 `config.timeMachine.enabled = true`，并填写 Time Machine 的 `destinationId` 与备份卷 `volumeUUID` 后启用；配置模板默认关闭。
+- 每 30 秒在后台检查一次。备份停止后，连续两次取得相同结果，且本次成功结果与新完成的备份记录一致，才尝试安全弹出整块目标硬盘。
+- 按固定卷 UUID 解析外置物理硬盘，弹出前再次核对身份与备份状态；不按卷名称或固定磁盘编号选择设备。
+- 备份失败、取消或无法确认成功时保留连接并通知；硬盘占用或弹出失败时通知处理，不强制弹出，不自动重试同一次结果。
+- 启动和重载时忽略已经完成的旧备份；已在运行的备份会继续观察。睡眠期间完成的新备份在唤醒后补查，不改变现有睡眠策略。
+- 确认整块硬盘退出后，通知“备份完成，硬盘已安全弹出，可以拔线”。下次备份前需要重新插入硬盘。
+- 状态读取异常时暂停弹出并通知，恢复后继续检查。详细约定见 [`docs/time-machine-auto-eject.md`](./docs/time-machine-auto-eject.md)。
+
 ### 剪贴板
 
 - 自动去除新复制文本首尾的空白，并显示一次“复制”提示。
@@ -105,12 +115,13 @@
 
 必需：
 
-- [Hammerspoon](https://www.hammerspoon.org/)，并授予辅助功能权限；如需接收天气、网络和蓝牙通知，还需允许通知权限。
+- [Hammerspoon](https://www.hammerspoon.org/)，并授予辅助功能权限；如需接收天气、网络、蓝牙和备份通知，还需允许通知权限。
 
 按启用功能选装：
 
 - [`blueutil`](https://github.com/toy/blueutil)：蓝牙控制。
 - Python 与 [weather_landscape](https://github.com/lds133/weather_landscape)：天气景观图和异常天气预报数据。
+- Python 3（本机使用 `/usr/bin/python3`）：Time Machine 状态检查和安全弹出，仅使用标准库。
 - `config.applications` 中配置的应用，以及休眠关闭或解锁启动所需的应用。
 
 ### 2. 安装配置
@@ -143,6 +154,7 @@ cp ~/.hammerspoon/config.example.lua ~/.hammerspoon/config.lua
 | `weather.*` | 城市、天气页面、Python、脚本目录、参数、预报 JSON 和深浅色图片路径 |
 | `wifi.company` | 公司 SSID |
 | `wifi.home` | 家庭 SSID 和恢复音量 |
+| `timeMachine.*` | 自动弹出开关、Time Machine 目标 ID、备份卷 UUID、Python 路径与检查间隔 |
 
 填写完成后，在 Hammerspoon 中执行 `Reload Config`。如需停用功能，以 [`init.lua`](./init.lua) 为入口，同时移除对应模块的加载、注册和启动调用；休眠监控依赖应用、蓝牙和 Wi-Fi 控制，需要一起调整。
 
@@ -156,6 +168,7 @@ cp ~/.hammerspoon/config.example.lua ~/.hammerspoon/config.lua
 | [`monitor`](./modules/monitor/monitor.lua) | 睡眠、唤醒、锁屏和解锁事件 |
 | [`bluetooth`](./modules/bluetooth/blueutils.lua) | 蓝牙开关和设备断开 |
 | [`wifi`](./modules/wifi/wifi.lua) | SSID 监听和系统声音 |
+| [`time_machine`](./modules/time_machine/time_machine.lua) | 备份结果观察、唤醒补查、整盘安全弹出和通知 |
 | [`weather`](./modules/weather/weather.lua) | 天气菜单、景观图和异常天气提醒 |
 | [`pasteboard`](./modules/pasteboard/pasteboard.lua) | 复制文本清理 |
 | [`history`](./modules/pasteboard/history.lua) | 剪贴板历史 |
@@ -168,3 +181,4 @@ cp ~/.hammerspoon/config.example.lua ~/.hammerspoon/config.lua
 
 - 功能是否启用以 [`init.lua`](./init.lua) 中的加载、注册和启动调用为准。
 - 修改后执行 `Reload Config`，检查 Hammerspoon Console 无新增错误，再验证受影响的快捷键或 watcher。
+- Time Machine 的模拟测试：`python3 -B -m unittest discover -s tests -p 'test_time_machine.py'`；Hammerspoon Console 中执行 `dofile(hs.configdir .. "/tests/test_time_machine.lua")`。两者都使用模拟数据，不操作真实硬盘。
