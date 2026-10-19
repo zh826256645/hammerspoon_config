@@ -12,7 +12,7 @@ return {
         -- modifiers/key 为可选快捷键；其余布尔字段为可选监控动作。
         { name = "Finder", bundleId = "com.apple.finder", modifiers = { "cmd" }, key = "E" },
         { name = "Alacritty", bundleId = "org.alacritty", modifiers = { "ctrl", "alt" }, key = "T" },
-        { name = "Edge", bundleId = "com.microsoft.edgemac", modifiers = { "cmd", "ctrl" }, key = "G" },
+        { name = "Ego Lite", bundleId = "com.citrolabs.ego.lite", modifiers = { "cmd", "ctrl" }, key = "G" },
         { name = "VS Code", bundleId = "com.microsoft.VSCode", modifiers = { "cmd", "ctrl" }, key = "V", workModeOnly = true },
         { name = "Podcasts", bundleId = "com.apple.podcasts", modifiers = { "cmd", "ctrl" }, key = "P", closeOnSleep = true },
         { name = "音流", bundleId = "cn.aqzscn.streamMusic", modifiers = { "cmd", "ctrl" }, key = "M", closeOnSleep = true },
