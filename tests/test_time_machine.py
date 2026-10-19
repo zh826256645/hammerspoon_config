@@ -159,18 +159,20 @@ class DiskSafetyTests(unittest.TestCase):
                 backup.eject(DESTINATION, VOLUME, observation())
             run.assert_not_called()
 
-    def test_eject_command_has_no_force_and_requires_offline_disk(self):
-        for remaining, succeeds in (([], True), (["disk6"], False)):
-            with self.subTest(remaining=remaining), patch.object(
-                    backup, "resolve_disk", return_value=self.disk), patch.object(
-                    backup, "observe", return_value=observation()), patch.object(
-                    backup, "run", side_effect=[b"ejected", plistlib.dumps({"AllDisks": remaining})]) as run:
-                if succeeds:
-                    backup.eject(DESTINATION, VOLUME, observation())
-                else:
-                    with self.assertRaises(RuntimeError):
-                        backup.eject(DESTINATION, VOLUME, observation())
-                self.assertEqual(run.call_args_list[0].args[0], [backup.DISKUTIL, "eject", "disk6"])
+    def test_eject_command_has_no_force(self):
+        with patch.object(backup, "resolve_disk", return_value=self.disk), patch.object(
+                backup, "observe", return_value=observation()), patch.object(
+                backup, "run", return_value=b"Disk disk6 ejected") as run:
+            backup.eject(DESTINATION, VOLUME, observation())
+            self.assertEqual(run.call_args_list[0].args[0], [backup.DISKUTIL, "eject", "disk6"])
+
+    def test_native_eject_failure_is_preserved(self):
+        with patch.object(backup, "resolve_disk", return_value=self.disk), patch.object(
+                backup, "observe", return_value=observation()), patch.object(
+                backup, "run", side_effect=RuntimeError("Resource busy")) as run:
+            with self.assertRaisesRegex(RuntimeError, "Resource busy"):
+                backup.eject(DESTINATION, VOLUME, observation())
+            run.assert_called_once_with([backup.DISKUTIL, "eject", "disk6"], timeout=90)
 
     def test_unreadable_status_cannot_be_treated_as_idle(self):
         preferences = {"Destinations": [{
@@ -178,6 +180,14 @@ class DiskSafetyTests(unittest.TestCase):
         with patch.object(backup, "run", side_effect=[plistlib.dumps(preferences), plistlib.dumps({})]):
             with self.assertRaises(RuntimeError):
                 backup.observe(DESTINATION, VOLUME)
+
+    def test_successful_eject_does_not_require_disappearing_device_record(self):
+        with patch.object(backup, "resolve_disk", return_value=self.disk), patch.object(
+                backup, "observe", return_value=observation()), patch.object(
+                backup, "run", side_effect=[b"Disk disk6 ejected",
+                                            plistlib.dumps({"AllDisks": ["disk6"]})]) as run:
+            backup.eject(DESTINATION, VOLUME, observation())
+            run.assert_called_once_with([backup.DISKUTIL, "eject", "disk6"], timeout=90)
 
 
 if __name__ == "__main__":

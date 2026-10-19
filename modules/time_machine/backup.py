@@ -97,11 +97,9 @@ def eject(destination_id, volume_uuid, expected):
     current = observe(destination_id, volume_uuid)
     if current["running"] or result_key(current) != result_key(expected):
         raise RuntimeError("备份状态已变化；未执行弹出")
+    # A successful whole-disk eject is the system's safe-removal confirmation.
+    # Device inventory may still contain the USB disk after this completes.
     run([DISKUTIL, "eject", disk["DeviceIdentifier"]], timeout=90)
-    # The physical device must be offline, rather than merely its backup volume.
-    disks = plistlib.loads(run([DISKUTIL, "list", "-plist"]))
-    if disk["DeviceIdentifier"] in disks.get("AllDisks", []):
-        raise RuntimeError("系统尚未确认整块硬盘退出，请先检查硬盘状态再拔线")
 
 
 def check(destination_id, volume_uuid, state):
