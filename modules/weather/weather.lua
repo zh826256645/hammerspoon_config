@@ -45,7 +45,7 @@ local weaEmoji = {
     yun = '⛅️',
     zhenyu = '🌧',
     yin = '☁️',
-    default = '⌛'
+    default = '❔'
 }
 
 local weatherDescriptionMap = {
@@ -87,29 +87,83 @@ local weatherDescriptionMap = {
     ["hail"] = "冰雹",
 }
 
+local function normalizeWeatherInfo(weatherInfoCN)
+    if type(weatherInfoCN) ~= "string" then
+        return nil
+    end
+
+    local weatherInfo = weatherInfoCN:match("^%s*(.-)%s*$")
+    if weatherInfo == "" or weatherInfo == "-" or weatherInfo == "9999" then
+        return nil
+    end
+    return weatherInfo
+end
+
 -- 获取天气对应的 emoji
 local function getWeaEmoji(weatherInfoCN)
+    local weatherInfo = normalizeWeatherInfo(weatherInfoCN)
+    if not weatherInfo then
+        return weaEmoji.default
+    end
+
     local weatherInfoPY = "default"
-    if weatherInfoCN == "雷" then
+    if weatherInfo == "雷" then
         weatherInfoPY = 'lei'
-    elseif weatherInfoCN == "晴" then
+    elseif weatherInfo == "晴" then
         weatherInfoPY = 'qing'
-    elseif weatherInfoCN == "沙尘" then
+    elseif weatherInfo == "沙尘" then
         weatherInfoPY = 'shachen'
-    elseif weatherInfoCN == "雾" then
+    elseif weatherInfo == "雾" then
         weatherInfoPY = 'wu'
-    elseif weatherInfoCN == "雨夹雪" then
+    elseif weatherInfo == "雨夹雪" then
         weatherInfoPY = 'yujiaxue'
-    elseif weatherInfoCN == "多云" then
+    elseif weatherInfo == "多云" then
         weatherInfoPY = 'yun'
-    elseif weatherInfoCN == "阵雨" then
+    elseif weatherInfo == "阵雨" then
         weatherInfoPY = 'zhenyu'
-    elseif weatherInfoCN == "阴" then
+    elseif weatherInfo == "阴" then
         weatherInfoPY = 'yin'
-    elseif weatherInfoCN ~= nil and string.find(weatherInfoCN, "雨") ~= nil then
+    elseif string.find(weatherInfo, "雷", 1, true) then
+        weatherInfoPY = 'lei'
+    elseif string.find(weatherInfo, "雨夹雪", 1, true) then
+        weatherInfoPY = 'yujiaxue'
+    elseif string.find(weatherInfo, "雨", 1, true) then
         weatherInfoPY = 'yu'
+    elseif string.find(weatherInfo, "雪", 1, true) then
+        weatherInfoPY = 'xue'
+    elseif string.find(weatherInfo, "沙尘", 1, true)
+        or string.find(weatherInfo, "扬沙", 1, true)
+        or string.find(weatherInfo, "浮尘", 1, true) then
+        weatherInfoPY = 'shachen'
+    elseif string.find(weatherInfo, "雾", 1, true) or string.find(weatherInfo, "霾", 1, true) then
+        weatherInfoPY = 'wu'
+    elseif string.find(weatherInfo, "多云", 1, true) then
+        weatherInfoPY = 'yun'
+    elseif string.find(weatherInfo, "晴", 1, true) then
+        weatherInfoPY = 'qing'
     end
     return weaEmoji[weatherInfoPY]
+end
+
+local function getForecastWeatherInfo(detail)
+    if not detail or not detail.day then
+        return nil
+    end
+
+    local dayInfo = normalizeWeatherInfo(detail.day.weather and detail.day.weather.info)
+    local nightInfo = normalizeWeatherInfo(detail.night and detail.night.weather and detail.night.weather.info)
+    local hour = tonumber(os.date("%H")) or 12
+    if hour >= 18 or hour < 6 then
+        return nightInfo or dayInfo
+    end
+    return dayInfo or nightInfo
+end
+
+local function formatCurrentWeatherTitle(weatherInfo, dateTable, weather, wind)
+    local infoText = weatherInfo or "天气更新中"
+    return string.format("%s %s日（今天） 🌡️%s℃ 💧%s 💨%s 🌬%s %s",
+        getWeaEmoji(weatherInfo), dateTable.day, weather.temperature, weather.rain, weather.humidity, wind.power,
+        infoText)
 end
 
 WeatherMenubar = hs.menubar.new()
@@ -346,18 +400,21 @@ function GetWeather()
         local publish_time = rawJson.publish_time
         local weather = rawJson.weather
         local wind = rawJson.wind
+        local currentWeatherInfo = normalizeWeatherInfo(weather.info)
         menuData = {}
 
-        WeatherMenubar:setTitle(getWeaEmoji(weather.info) .. math.floor(weather.temperature) .. " " .. weather.info)
+        local menubarTitle = getWeaEmoji(currentWeatherInfo) .. math.floor(weather.temperature)
+        if currentWeatherInfo then
+            menubarTitle = menubarTitle .. " " .. currentWeatherInfo
+        end
+        WeatherMenubar:setTitle(menubarTitle)
 
         local dateTable = FormatTimeToDateTable(publish_time, "%Y-%m-%d %H:%M")
 
         local tipStr = string.format("更新于 %s-%s %s:%s", dateTable.month, dateTable.day, dateTable.hour,
             dateTable.minute)
         WeatherMenubar:setTooltip(tipStr)
-        local titleStr = string.format("%s %s日（今天） 🌡️%s℃ 💧%s 💨%s 🌬%s %s",
-            getWeaEmoji(weather.info), dateTable.day, weather.temperature, weather.rain, weather.humidity, wind.power,
-            weather.info)
+        local titleStr = formatCurrentWeatherTitle(currentWeatherInfo, dateTable, weather, wind)
 
         local firstLine = {
             title = titleStr,
@@ -386,6 +443,13 @@ function GetWeather()
 
                 local nextMenu = hs.fnutils.copy(menuData)
                 local detailMenu = buildDetailMenu(detailJson)
+                local forecastWeatherInfo = getForecastWeatherInfo(detailJson.data.predict.detail[1])
+                local displayWeatherInfo = currentWeatherInfo or forecastWeatherInfo
+                if displayWeatherInfo then
+                    WeatherMenubar:setTitle(
+                        getWeaEmoji(displayWeatherInfo) .. math.floor(weather.temperature) .. " " .. displayWeatherInfo)
+                    nextMenu[1].title = formatCurrentWeatherTitle(displayWeatherInfo, dateTable, weather, wind)
+                end
                 for _, item in ipairs(detailMenu) do
                     table.insert(nextMenu, item)
                 end
