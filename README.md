@@ -61,7 +61,7 @@
 - 娱乐模式下屏幕持续休眠 15 秒后：关闭设置了 `closeOnSleep = true` 或 `closeOnSleepInEntertainmentMode = true` 的应用，断开配置的蓝牙设备，并关闭蓝牙与 Wi-Fi。
 - 工作模式下屏幕休眠不执行应用或设备清理。
 - 屏幕唤醒 5 秒后，如果没有再次休眠，预先打开蓝牙与 Wi-Fi。
-- 解锁后取消尚未执行的休眠 / 唤醒任务，立即打开蓝牙与 Wi-Fi，并启动设置了 `openOnUnlock = true` 的应用（当前为 Scroll Reverser）。
+- 解锁后取消尚未执行的休眠 / 唤醒任务，立即打开蓝牙与 Wi-Fi；只有配置了 `openOnUnlock = true` 的应用才会在解锁后启动。
 - 连续发生睡眠、唤醒或解锁事件时，过期的延迟任务会被跳过。
 
 ### Wi-Fi 与系统声音

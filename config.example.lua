@@ -20,7 +20,6 @@ return {
         { name = "微信", bundleId = "com.tencent.xinWeChat", modifiers = { "cmd", "ctrl" }, key = "X", closeOnSleepInEntertainmentMode = true },
         { name = "企业微信", bundleId = "com.tencent.WeWorkMac", modifiers = { "cmd", "ctrl" }, key = "W", workModeOnly = true, closeOnSleepInEntertainmentMode = true },
         { name = "飞书", bundleId = "com.bytedance.macos.feishu", modifiers = { "cmd", "ctrl" }, key = "E", workModeOnly = true },
-        { name = "Scroll Reverser", bundleId = "com.pilotmoon.scroll-reverser", openOnUnlock = true },
     },
     bluetooth = {
         blueutilPath = "/path/to/blueutil",
