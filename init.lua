@@ -5,6 +5,7 @@ assert(configLoaded, "无法加载 config.lua，请复制 config.example.lua 并
 
 require "modules/utils/stringUtils"
 require "modules/utils/utils"
+require "hs.ipc" -- 允许 hs CLI 从外部调用，例如 hs -c 'ComputerMode:toggle()'
 require "modules/shortcuts/hotkey"
 require "modules/computer_mode/computer_mode"
 require "modules/window/windows"

@@ -49,10 +49,11 @@
 ### 工作 / 娱乐模式
 
 - 使用 `⌃⌥⌘ + W` 手动切换，当前模式保存在 `hs.settings` 中，重载后继续保留。
-- 周一至周六每分钟检查一次：08:30（含）～09:30（含）当天首次检查切换到工作模式，18:10（含）后当天首次检查切换到娱乐模式；错过上午时间窗口后当天不会自动进入工作模式，周日不自动切换。
+- 周一至周六每分钟检查一次：08:30（含）～09:30（含）当天首次检查切换到工作模式，18:10（含）后当天首次检查切换到娱乐模式；错过上午时间窗口后当天不会自动进入工作模式。
+- 周日不自动切换，保持当前模式直到周一 08:30；工作模式下的空闲休眠阻断也一并在周日保持，这是既定行为，不是遗漏。
 - 当天是否已执行自动切换同样保存在 `hs.settings` 中，重载配置不会重复执行。
-- 工作 / 娱乐模式暂不管理 macOS 触发角。
-- 工作模式下接通电源时阻止系统因空闲自动休眠，但允许屏幕关闭、主动睡眠和合盖休眠；娱乐模式恢复系统默认策略。
+- 工作 / 娱乐模式不管理 macOS 触发角。
+- 工作模式下阻止系统因空闲自动休眠（不区分电池或电源适配器），但允许屏幕关闭、主动睡眠和合盖休眠；娱乐模式恢复系统默认策略。
 - 设置了 `workModeOnly = true` 的应用快捷键只在工作模式启用。
 - 屏幕休眠后的应用、蓝牙和 Wi-Fi 行为按休眠开始时的模式处理。
 
@@ -120,7 +121,7 @@
 按启用功能选装：
 
 - [`blueutil`](https://github.com/toy/blueutil)：蓝牙控制。
-- Python 与 [weather_landscape](https://github.com/lds133/weather_landscape)：天气景观图和异常天气预报数据。
+- Python 与 [weather_landscape](https://github.com/lds133/weather_landscape)：天气景观图和异常天气预报数据。该解释器需能 `import PIL`，推荐在项目内用 `.venv` 并安装 `requirements.txt`，把 `config.weather.pythonPath` 指向 `.venv/bin/python`；解释器被删除或改名后 `hs.task` 会报 `launch path not accessible`，天气图停止更新。
 - Python 3（本机使用 `/usr/bin/python3`）：Time Machine 状态检查和安全弹出，仅使用标准库。
 - `config.applications` 中配置的应用，以及休眠关闭或解锁启动所需的应用。
 
@@ -163,7 +164,7 @@ cp ~/.hammerspoon/config.example.lua ~/.hammerspoon/config.lua
 | 模块 | 职责 |
 | --- | --- |
 | [`application`](./modules/application/application.lua) | 统一应用注册表、快捷键以及睡眠 / 解锁动作 |
-| [`computer_mode`](./modules/computer_mode/computer_mode.lua) | 工作 / 娱乐模式、定时切换和触发角 |
+| [`computer_mode`](./modules/computer_mode/computer_mode.lua) | 工作 / 娱乐模式与定时切换 |
 | [`window`](./modules/window/windows.lua) | 窗口吸附、尺寸、跨屏移动和屏幕焦点 |
 | [`monitor`](./modules/monitor/monitor.lua) | 睡眠、唤醒、锁屏和解锁事件 |
 | [`bluetooth`](./modules/bluetooth/blueutils.lua) | 蓝牙开关和设备断开 |
@@ -180,5 +181,6 @@ cp ~/.hammerspoon/config.example.lua ~/.hammerspoon/config.lua
 ## 修改与验证
 
 - 功能是否启用以 [`init.lua`](./init.lua) 中的加载、注册和启动调用为准。
+- 配置已加载 `hs.ipc`，可用 `hs -c '...'` 从终端调用 Hammerspoon API，例如 `hs -c 'ComputerMode:toggle()'`；同一用户下的进程都能借此控制 Hammerspoon，多人共用账户时不要启用。
 - 修改后执行 `Reload Config`，检查 Hammerspoon Console 无新增错误，再验证受影响的快捷键或 watcher。
 - Time Machine 的模拟测试：`python3 -B -m unittest discover -s tests -p 'test_time_machine.py'`；Hammerspoon Console 中执行 `dofile(hs.configdir .. "/tests/test_time_machine.lua")`。两者都使用模拟数据，不操作真实硬盘。
