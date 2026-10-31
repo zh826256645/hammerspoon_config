@@ -159,6 +159,15 @@ local function getForecastWeatherInfo(detail)
     return dayInfo or nightInfo
 end
 
+-- 标题只在数据齐全后写一次，避免占位 emoji（如 ❔）短暂上屏造成闪动
+local function setWeatherTitle(weatherInfo, weather)
+    local title = getWeaEmoji(weatherInfo) .. math.floor(weather.temperature)
+    if weatherInfo then
+        title = title .. " " .. weatherInfo
+    end
+    WeatherMenubar:setTitle(title)
+end
+
 local function formatCurrentWeatherTitle(weatherInfo, dateTable, weather, wind)
     local infoText = weatherInfo or "天气更新中"
     return string.format("%s %s日（今天） 🌡️%s℃ 💧%s 💨%s 🌬%s %s",
@@ -403,12 +412,6 @@ function GetWeather()
         local currentWeatherInfo = normalizeWeatherInfo(weather.info)
         menuData = {}
 
-        local menubarTitle = getWeaEmoji(currentWeatherInfo) .. math.floor(weather.temperature)
-        if currentWeatherInfo then
-            menubarTitle = menubarTitle .. " " .. currentWeatherInfo
-        end
-        WeatherMenubar:setTitle(menubarTitle)
-
         local dateTable = FormatTimeToDateTable(publish_time, "%Y-%m-%d %H:%M")
 
         local tipStr = string.format("更新于 %s-%s %s:%s", dateTable.month, dateTable.day, dateTable.hour,
@@ -432,12 +435,18 @@ function GetWeather()
                 end
                 if detailCode ~= 200 then
                     print('get weather error:' .. detailCode .. 'url: ' .. detailWeatherUrl)
+                    if currentWeatherInfo then
+                        setWeatherTitle(currentWeatherInfo, weather)
+                    end
                     return
                 end
 
                 local detailJson = safeJsonDecode(detailBody)
                 if not detailJson or not detailJson.data or not detailJson.data.predict or not detailJson.data.predict.detail then
                     print('get weather decode error: detail weather payload invalid')
+                    if currentWeatherInfo then
+                        setWeatherTitle(currentWeatherInfo, weather)
+                    end
                     return
                 end
 
@@ -446,8 +455,7 @@ function GetWeather()
                 local forecastWeatherInfo = getForecastWeatherInfo(detailJson.data.predict.detail[1])
                 local displayWeatherInfo = currentWeatherInfo or forecastWeatherInfo
                 if displayWeatherInfo then
-                    WeatherMenubar:setTitle(
-                        getWeaEmoji(displayWeatherInfo) .. math.floor(weather.temperature) .. " " .. displayWeatherInfo)
+                    setWeatherTitle(displayWeatherInfo, weather)
                     nextMenu[1].title = formatCurrentWeatherTitle(displayWeatherInfo, dateTable, weather, wind)
                 end
                 for _, item in ipairs(detailMenu) do
