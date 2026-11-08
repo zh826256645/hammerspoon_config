@@ -72,6 +72,13 @@
 - 连接家庭 Wi-Fi 时，仅在默认输出设备为内置扬声器且当前静音时取消静音，并设置为 `config.wifi.home.volume`。
 - Wi-Fi 配置缺失时自动停用 SSID 监听并显示通知，不影响其他模块加载。
 
+### Tailscale 路由自动切换
+
+- 监听 Wi-Fi SSID、局域网网卡地址、Wi-Fi 切换和系统唤醒。
+- 在家时关闭 `accept-routes`，并从局域网网卡发送一次探测包，避免服务器广播的 `192.168.31.116/32` 把直连 UDP 路由回隧道。
+- 离开家时重新开启 `accept-routes`，保留通过 `192.168.31.116` 访问家中服务的能力。
+- 每 30 秒补查一次，覆盖有线网络和网络位置变化。
+
 ### 蓝牙
 
 - 通过 `blueutil` 开关蓝牙。
@@ -155,6 +162,8 @@ cp ~/.hammerspoon/config.example.lua ~/.hammerspoon/config.lua
 | `weather.*` | 城市、天气页面、Python、脚本目录、参数、预报 JSON 和深浅色图片路径 |
 | `wifi.company` | 公司 SSID |
 | `wifi.home` | 家庭 SSID 和恢复音量 |
+| `tailscale.homeSubnet` | 家庭局域网地址前缀，用于判断是否在家 |
+| `tailscale.probeHost` | 回家时触发局域网 ARP 的服务器地址 |
 | `timeMachine.*` | 自动弹出开关、Time Machine 目标 ID、备份卷 UUID、Python 路径与检查间隔 |
 
 填写完成后，在 Hammerspoon 中执行 `Reload Config`。如需停用功能，以 [`init.lua`](./init.lua) 为入口，同时移除对应模块的加载、注册和启动调用；休眠监控依赖应用、蓝牙和 Wi-Fi 控制，需要一起调整。
@@ -169,6 +178,7 @@ cp ~/.hammerspoon/config.example.lua ~/.hammerspoon/config.lua
 | [`monitor`](./modules/monitor/monitor.lua) | 睡眠、唤醒、锁屏和解锁事件 |
 | [`bluetooth`](./modules/bluetooth/blueutils.lua) | 蓝牙开关和设备断开 |
 | [`wifi`](./modules/wifi/wifi.lua) | SSID 监听和系统声音 |
+| [`tailscale`](./modules/tailscale/route_autoswitch.lua) | 按网络位置切换 Tailscale 路由接受策略 |
 | [`time_machine`](./modules/time_machine/time_machine.lua) | 备份结果观察、唤醒补查、整盘安全弹出和通知 |
 | [`weather`](./modules/weather/weather.lua) | 天气菜单、景观图和异常天气提醒 |
 | [`pasteboard`](./modules/pasteboard/pasteboard.lua) | 复制文本清理 |

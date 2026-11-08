@@ -17,6 +17,7 @@ require "modules/pasteboard/pasteboard"
 require "modules/pasteboard/history"
 local WifiControl = require "modules/wifi/wifi"
 local TimeMachineControl = require "modules/time_machine/time_machine"
+local TailscaleRoute = require "modules/tailscale/route_autoswitch"
 require "modules/input_method/input_method"
 require "modules/help/helps"
 
@@ -60,6 +61,9 @@ WifiWatcher = WifiControl.registerWatcher()
 if WifiWatcher ~= nil then
     WifiWatcher:start()
 end
+
+-- 按网络位置切换 Tailscale 路由接受策略
+TailscaleRoute.start()
 
 -- 注册 Time Machine 备份后安全弹出
 TimeMachineBackup = TimeMachineControl.register()

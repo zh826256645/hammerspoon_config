@@ -47,4 +47,8 @@ return {
             volume = 50,
         },
     },
+    tailscale = {
+        homeSubnet = "192.168.31.",
+        probeHost = "192.168.31.116",
+    },
 }
