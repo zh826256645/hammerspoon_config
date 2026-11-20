@@ -1,19 +1,20 @@
--- 周一、周四 19:00 刷新斗鱼 Cookie；执行 home-server-ops 的 refresh.sh。
+-- 每天 08:00、21:30 检查斗鱼 Cookie 剩余时长；不足阈值时由 renew-if-needed.sh
+-- 打开斗鱼页面触发静默续期，再走 refresh.sh 校验并同步到服务器。
 local CookieRefresh = {}
 
-local SCRIPT = "/Users/zhonghao/Projects/home-server-ops/work/douyu-refresh/refresh.sh"
+local SCRIPT = "/Users/zhonghao/Projects/home-server-ops/work/douyu-refresh/renew-if-needed.sh"
 local LOG = "/Users/zhonghao/Projects/home-server-ops/work/douyu-refresh/hs-cookie-refresh.log"
 local ENV = {
     HOME = "/Users/zhonghao",
     PATH = "/Users/zhonghao/.local/bin:/usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin",
     LANG = "en_US.UTF-8",
 }
-local WEEKDAYS = { Monday = true, Thursday = true }
+local DAILY = { { hour = 8, min = 0 }, { hour = 21, min = 30 } }
 
 local function appendLog(text)
     local file = io.open(LOG, "a")
     if file == nil then
-        print("斗鱼 Cookie 刷新: 无法写入日志 " .. LOG)
+        print("斗鱼 Cookie 续期: 无法写入日志 " .. LOG)
         return
     end
     file:write(text)
@@ -21,30 +22,34 @@ local function appendLog(text)
 end
 
 local function notify(message)
-    print("斗鱼 Cookie 刷新: " .. message)
+    print("斗鱼 Cookie 续期: " .. message)
     hs.notify.new({
-        title = "斗鱼 Cookie 刷新未成功",
+        title = "斗鱼 Cookie 续期未成功",
         informativeText = message,
     }):send()
 end
 
--- 本机 Hammerspoon 1.1.1 的 doAt 只接受固定间隔，不支持按星期触发。
+-- 本机 Hammerspoon 1.1.1 的 doAt 只接受固定间隔，因此自己算出下一次触发时刻。
 local function nextTriggerTime(notBefore)
     local now = notBefore or os.time()
+    local best = nil
     local base = os.date("*t", now)
-    for offset = 0, 8 do
-        local candidate = os.time({
-            year = base.year,
-            month = base.month,
-            day = base.day + offset,
-            hour = 19,
-            min = 0,
-            sec = 0,
-        })
-        if candidate > now and WEEKDAYS[os.date("%A", candidate)] then
-            return candidate
+    for offset = 0, 2 do
+        for _, slot in ipairs(DAILY) do
+            local candidate = os.time({
+                year = base.year,
+                month = base.month,
+                day = base.day + offset,
+                hour = slot.hour,
+                min = slot.min,
+                sec = 0,
+            })
+            if candidate > now and (best == nil or candidate < best) then
+                best = candidate
+            end
         end
     end
+    return best
 end
 
 local function schedule(notBefore)
@@ -59,7 +64,7 @@ end
 
 function CookieRefresh.run()
     if CookieRefresh.task ~= nil then
-        print("斗鱼 Cookie 刷新: 上一次仍在执行，跳过本次")
+        print("斗鱼 Cookie 续期: 上一次仍在执行，跳过本次")
         return false
     end
 
